@@ -14,5 +14,3 @@ summary(beet_22_raw)
 beet_22_no_replicates <- beet_22_raw %>% group_by(ID, site, replicate, trap, label, season, year, full_label) %>% summarise(across(c(anthia_decemguttata,stenocara_dentata,starts_with("morphospecies")), sum)) %>% ungroup()
 
 beet_22_condensed <- beet_22_no_replicates %>% select(-c(site, replicate, trap, season, year, full_label))
-
-
