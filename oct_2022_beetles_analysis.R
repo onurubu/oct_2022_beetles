@@ -43,3 +43,4 @@ ggplot(site_diversity, aes(x = site, y = diversity, group = 1)) + geom_point() +
 # individual insects per altitudinal site
 
 ggplot(site_count, aes (x = site, y = individuals, group = 1)) + geom_point() + geom_line()
+
