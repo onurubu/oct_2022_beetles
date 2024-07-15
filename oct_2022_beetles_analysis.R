@@ -5,6 +5,7 @@
 # set-up ####
 
 # packages
+rm(list = ls())
 library(tidyverse)
 
 # reading in raw data with correct data types
@@ -44,6 +45,11 @@ ggplot(site_diversity, aes(x = site, y = diversity, group = 1)) + geom_point() +
 
 ggplot(site_count, aes (x = site, y = individuals, group = 1)) + geom_point() + geom_line()
 
-beet_22_condensed %>% select(ID, site, label, morphospecies_62) %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(c(ID, site, label, individuals)) %>% group_by(site) %>% summarise(individuals = sum(individuals))
+# working data ####
+# edit the morphospecies numbers and sites for the specimens of interest
 
+beet_22_condensed %>% group_by(site) %>% summarise(individuals = sum(morphospecies_52))
 
+# individual site samples
+
+(species_by_site <- beet_22_raw %>% select(ID, site, label, morphospecies_) %>% filter(site == 2, morphospecies_ > 0))
