@@ -6,7 +6,6 @@
 
 # packages
 library(tidyverse)
-library(ggplot2)
 
 # reading in raw data with correct data types
 
@@ -25,6 +24,7 @@ colnames(species_specimen_count) <- c("morphospecies", "individuals")
 rm(x)}
 
 species_specimen_count %>% arrange(desc(individuals)) # ordered descendingly
+species_specimen_count %>% summarise(individuals = sum(individuals))
 
 # calculating number of individual insects found per altitudinal site
 
@@ -43,4 +43,7 @@ ggplot(site_diversity, aes(x = site, y = diversity, group = 1)) + geom_point() +
 # individual insects per altitudinal site
 
 ggplot(site_count, aes (x = site, y = individuals, group = 1)) + geom_point() + geom_line()
+
+beet_22_condensed %>% select(ID, site, label, morphospecies_62) %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(c(ID, site, label, individuals)) %>% group_by(site) %>% summarise(individuals = sum(individuals))
+
 
