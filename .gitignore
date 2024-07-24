@@ -1,3 +1,6 @@
+# Temporary files from spreadsheet
+.~lock
+
 # History files
 .Rhistory
 .Rapp.history

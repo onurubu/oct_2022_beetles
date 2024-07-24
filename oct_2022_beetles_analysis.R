@@ -51,9 +51,9 @@ species_specimen_count %>% arrange(individuals)
 
 # edit the morphospecies numbers and sites for the specimens of interest
 
-beet_22_condensed %>% group_by(site) %>% summarise(individuals = sum(morphospecies_135))
+beet_22_condensed %>% group_by(site) %>% summarise(individuals = sum(morphospecies_44))
 
 # individual site samples
 
-(species_by_site <- beet_22_raw %>% select(ID, site, label, morphospecies_135) %>% filter(site == 1, morphospecies_135 > 0))
+(species_by_site <- beet_22_condensed %>% select(ID, site, label, morphospecies_44) %>% filter(site == 14, morphospecies_44 > 0))
 
