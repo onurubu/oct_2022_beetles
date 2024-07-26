@@ -46,14 +46,17 @@ ggplot(site_diversity, aes(x = site, y = diversity, group = 1)) + geom_point() +
 ggplot(site_count, aes (x = site, y = individuals, group = 1)) + geom_point() + geom_line()
 
 # working data ####
+# up to spp 7, 2108
 
-species_specimen_count %>% arrange(individuals)
+species_specimen_count %>% filter(individuals < 10) %>%  arrange(individuals)
 
 # edit the morphospecies numbers and sites for the specimens of interest
 
-beet_22_condensed %>% group_by(site) %>% summarise(individuals = sum(morphospecies_44))
+beet_22_condensed %>% group_by(site) %>% summarise(individuals = sum(morphospecies_119)) %>%
+  filter(individuals > 0)
 
 # individual site samples
 
-(species_by_site <- beet_22_condensed %>% select(ID, site, label, morphospecies_44) %>% filter(site == 14, morphospecies_44 > 0))
+(species_by_site <- beet_22_condensed %>% select(ID, site, label, morphospecies_119) %>%
+  filter(site == 14, morphospecies_119 > 0))
 
