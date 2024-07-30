@@ -48,15 +48,16 @@ ggplot(site_count, aes (x = site, y = individuals, group = 1)) + geom_point() + 
 # working data ####
 # up to spp 7, 2108
 
-species_specimen_count %>% filter(individuals < 10) %>%  arrange(individuals)
+species_specimen_count %>% filter(individuals < 3) %>%  arrange(individuals)
 
 # edit the morphospecies numbers and sites for the specimens of interest
 
-beet_22_condensed %>% group_by(site) %>% summarise(individuals = sum(morphospecies_119)) %>%
+beet_22_condensed %>% filter(trap != 3) %>% group_by(site) %>% 
+  summarise(individuals = sum(morphospecies_127)) %>%
   filter(individuals > 0)
 
 # individual site samples
 
-(species_by_site <- beet_22_condensed %>% select(ID, site, label, morphospecies_119) %>%
-  filter(site == 14, morphospecies_119 > 0))
+(species_by_site <- beet_22_condensed %>% select(ID, site, label, morphospecies_127) %>%
+  filter(site == 1, morphospecies_127 > 0))
 
