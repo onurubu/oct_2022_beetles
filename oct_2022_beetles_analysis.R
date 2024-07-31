@@ -60,5 +60,4 @@ ggplot(site_count, aes (x = site, y = individuals, group = 1)) + geom_point() + 
 
 # (species_by_site <- beet_22_condensed %>% select(ID, site, label, morphospecies_69) %>%
 #   filter(morphospecies_69 > 0))
-# 
 
