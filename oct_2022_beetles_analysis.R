@@ -62,12 +62,49 @@ ggplot(site_diversity, aes(x = site, y = diversity, group = 1, colour = "black")
 
 ggplot(site_count, aes (x = site, y = individuals, group = 1, colour = "black")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 450)) + theme(axis.text = element_text(size = 8)) + geom_point(data = abundance_2002, aes(colour = "red")) + geom_line(data = abundance_2002, aes(colour = "red")) + scale_colour_manual(name = NULL, values =c("red"="red", "black"="black"), labels = c("2022","2002")) + theme(legend.position = c(.9, .9))
 
-# diversity ratio
+# ICSZ specific analyses ####
 
-(dratio <- site_count$individuals/site_diversity$diversity)
+reduced_2022 <- beet_22_raw %>% filter(site %in% c("8","9","10")) %>% group_by(ID, site, replicate, trap, label, season, year, full_label) %>% summarise(across(c(anthia_decemguttata, stenocara_dentata, starts_with("morphospecies")), sum)) %>% ungroup()
 
-# working data ####
-# up to spp 7, 2108
+reduced_2002 <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% filter(site %in% c("8","9","10"))
+
+{x <- mapply(sum,reduced_2022[,-c(1:8)])
+  red_species_specimen_count <- cbind(read.table(text = names(x)), x)
+  rownames(red_species_specimen_count) <- NULL
+  colnames(red_species_specimen_count) <- c("morphospecies", "individuals")
+  rm(x)}
+
+{y <- mapply(sum,reduced_2002[,-c(1:4)])
+  red_species_02 <- cbind(read.table(text = names(y)), y)
+  rownames(red_species_02) <- NULL
+  colnames(red_species_02) <- c("morphospecies", "individuals")
+  rm(y)}
+
+
+red_species_specimen_count %>% filter(individuals > 0) %>% arrange(individuals) # ordered descendingly
+red_species_specimen_count %>% summarise(individuals = sum(individuals))
+
+red_species_02 %>% filter(individuals > 0) %>% arrange(individuals)
+species_02 %>% summarise(individuals = sum(individuals))
+
+# selecting the three primary species to conduct hypothesis tests
+
+(hyp_red_2022 <- reduced_2022 %>% rename(zophosis_gracilicornis = morphospecies_6) %>% select(site,replicate,year,anthia_decemguttata,stenocara_dentata,zophosis_gracilicornis) %>% group_by(site,replicate,year) %>% summarise(across(c(anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis), sum)) %>% ungroup())
+
+(hyp_red_2002 <- reduced_2002 %>% rename(zophosis_gracilicornis = Zophosis.sp.1, anthia_decemguttata = Thermophilum.decemguttatum, stenocara_dentata = Stenocara.dentata) %>% select(site,replicate,year,anthia_decemguttata,stenocara_dentata,zophosis_gracilicornis))
+
+hyp_red_all <- rbind(hyp_red_2002,hyp_red_2022)
+
+t.test(x = hyp_red_2002$anthia_decemguttata, y = hyp_red_2022$anthia_decemguttata, alternative = "two.sided", paired = TRUE)
+
+t.test(x = hyp_red_2002$stenocara_dentata, y = hyp_red_2022$stenocara_dentata, alternative = "two.sided", paired = TRUE)
+
+t.test(x = hyp_red_2002$zophosis_gracilicornis, y = hyp_red_2022$zophosis_gracilicornis, alternative = "two.sided", paired = TRUE)
+
+(1 - mean(hyp_red_all$zophosis_gracilicornis[hyp_red_all$year=="2022"])/mean(hyp_red_all$zophosis_gracilicornis[hyp_red_all$year=="2002"]))*100
+
+# sorting working data ####
+# used to sort morphospecies into boxes
 
 # species_specimen_count %>% filter(individuals < 2) %>%  arrange(individuals)
 
