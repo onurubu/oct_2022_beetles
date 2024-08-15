@@ -34,3 +34,6 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 .~lock.ceder_beetle_diversity_october_2022.csv#
+MDS.R
+PCA.R
+protein.csv

@@ -32,10 +32,10 @@ rm(x)}
   colnames(species_02) <- c("morphospecies", "individuals")
   rm(y)}
 
-species_specimen_count %>% arrange(desc(individuals)) # ordered descendingly
+species_specimen_count %>% arrange(individuals) # ordered descendingly
 species_specimen_count %>% summarise(individuals = sum(individuals))
 
-species_02 %>%  arrange(desc(individuals))
+species_02 %>%  arrange(individuals)
 species_02 %>% summarise(individuals = sum(individuals))
 
 # calculating number of individual insects found per altitudinal site
@@ -56,11 +56,11 @@ alt_labels <- c("0m W","200m W","300m W","500m W","700m W","900m W","1100m W","1
 
 # species diversity per altitudinal site
 
-ggplot(site_diversity, aes(x = site, y = diversity, group = 1, colour = "black")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of morphospecies") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 40)) + theme(axis.text = element_text(size = 8)) + geom_point(data = diversity_2002, aes(colour = "red")) + geom_line(data = diversity_2002, aes(colour = "red")) + scale_colour_manual(name = NULL, values =c("black"="black","red"="red"), labels = c("2022","2002")) + theme(legend.position = c(.9, .9))
+ggplot(site_diversity, aes(x = site, y = diversity, group = 1, colour = "black")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of morphospecies") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 40)) + theme(axis.text = element_text(size = 8)) + geom_point(data = diversity_2002, aes(colour = "grey")) + geom_line(data = diversity_2002, aes(colour = "grey")) + scale_colour_manual(name = NULL, values =c("black"="black","grey"="grey"), labels = c("2022","2002")) + theme(legend.position = c(.9, .9))
 
 # individual insects per altitudinal site
 
-ggplot(site_count, aes (x = site, y = individuals, group = 1, colour = "black")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 450)) + theme(axis.text = element_text(size = 8)) + geom_point(data = abundance_2002, aes(colour = "red")) + geom_line(data = abundance_2002, aes(colour = "red")) + scale_colour_manual(name = NULL, values =c("red"="red", "black"="black"), labels = c("2022","2002")) + theme(legend.position = c(.9, .9))
+ggplot(site_count, aes (x = site, y = individuals, group = 1, colour = "black")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 450)) + theme(axis.text = element_text(size = 8)) + geom_point(data = abundance_2002, aes(colour = "grey")) + geom_line(data = abundance_2002, aes(colour = "grey")) + scale_colour_manual(name = NULL, values =c("grey"="grey", "black"="black"), labels = c("2022","2002")) + theme(legend.position = c(.9, .9))
 
 # ICSZ specific analyses ####
 
@@ -85,7 +85,7 @@ red_species_specimen_count %>% filter(individuals > 0) %>% arrange(individuals) 
 red_species_specimen_count %>% summarise(individuals = sum(individuals))
 
 red_species_02 %>% filter(individuals > 0) %>% arrange(individuals)
-species_02 %>% summarise(individuals = sum(individuals))
+red_species_02 %>% summarise(individuals = sum(individuals))
 
 # selecting the three primary species to conduct hypothesis tests
 
@@ -102,6 +102,22 @@ t.test(x = hyp_red_2002$stenocara_dentata, y = hyp_red_2022$stenocara_dentata, a
 t.test(x = hyp_red_2002$zophosis_gracilicornis, y = hyp_red_2022$zophosis_gracilicornis, alternative = "two.sided", paired = TRUE)
 
 (1 - mean(hyp_red_all$zophosis_gracilicornis[hyp_red_all$year=="2022"])/mean(hyp_red_all$zophosis_gracilicornis[hyp_red_all$year=="2002"]))*100
+
+# climate analyses begin here
+
+for (k in 1:length(unique(beet_22_raw$site))){
+  dat <-  read.csv(file = paste0("./climate_data/climate_site_", k , ".csv"))
+  assign(paste0("temp_",k), dat)
+  {if (k==length(unique(beet_22_raw$site))){rm(dat, k)}}
+}
+
+
+
+
+
+# end of ICSZ analyses
+
+
 
 # sorting working data ####
 # used to sort morphospecies into boxes
