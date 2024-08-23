@@ -31,17 +31,17 @@ rm(x)}
   colnames(species_02) <- c("morphospecies", "individuals")
   rm(x)}
 
-species_22 %>% arrange(individuals) # ordered descendingly
-species_22 %>% summarise(individuals = sum(individuals))
+species_22 %>% filter(morphospecies %in% c("morphospecies_6", "anthia_decemguttata", "stenocara_dentata")) %>% arrange(individuals)
+species_22 %>% filter(morphospecies %in% c("morphospecies_6", "anthia_decemguttata", "stenocara_dentata")) %>% summarise(individuals = sum(individuals))
 
-species_02 %>%  arrange(individuals)
-species_02 %>% summarise(individuals = sum(individuals))
+species_02 %>% filter(morphospecies %in% c("Zophosis.sp.1", "Thermophilum.decemguttatum", "Stenocara.dentata")) %>%  arrange(individuals)
+species_02 %>% filter(morphospecies %in% c("Zophosis.sp.1", "Thermophilum.decemguttatum", "Stenocara.dentata")) %>% summarise(individuals = sum(individuals)) # 21% loss in abundance overall
 
 # calculating number of individual insects found per altitudinal site
 
-abundance_2022 <- beet_22_raw %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(c(ID, year, site, label, individuals)) %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop")
+abundance_2022 <- beet_22_raw %>% mutate(individuals = rowSums(across(c(anthia_decemguttata, stenocara_dentata, morphospecies_6)), na.rm=TRUE)) %>% select(c(ID, year, site, label, individuals)) %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop")
 
-abundance_2002 <- beet_02_raw %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(year, site, individuals) %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop")
+abundance_2002 <- beet_02_raw %>% mutate(individuals = rowSums(across(c(Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1)), na.rm=TRUE)) %>% select(year, site, individuals) %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop")
 
 # calculating species diversity per site
 
@@ -51,7 +51,7 @@ diversity_2002 <- beet_02_raw %>% group_by(site) %>% summarise(across(where(is.n
 
 # graphs ####
 
-alt_labels <- c("0m W","200m W","300m W","500m W","700m W","900m W","1100m W","1300m W","1500m W","1700m W","1900m W","1700m E","1500m E","1300m E","1100m E","900m E","500m E")
+alt_labels <- c("0m(W)","200m(W)","300m(W)","500m(W)","700m(W)","900m(W)","1100m(W)","1300m(W)","1500m(W)","1700m(W)","1900m(W)","1700m(E)","1500m(E)","1300m(E)","1100m(E)","900m(E)","500m(E)")
 
 # species diversity per altitudinal site
 
@@ -59,15 +59,17 @@ ggplot(diversity_2002, aes(x = site, y = diversity, group = 1, colour = "darkgre
 
 # individual insects per altitudinal site
 
-ggplot(abundance_2002, aes (x = site, y = individuals, group = 1, colour = "darkgrey")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 450)) + theme(axis.text = element_text(size = 8)) + geom_point(data = abundance_2022, aes(colour = "black")) + geom_line(data = abundance_2022, aes(colour = "black")) + scale_colour_manual(name = NULL, values =c("black"="black", "darkgrey"="darkgrey"), labels = c("2022","2002"))  + theme(legend.position = "inside", legend.position.inside = c(.9, .9))
+ggplot(abundance_2002, aes (x = site, y = individuals, group = 1, colour = "darkgrey")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_y_continuous(expand = c(0, 0), limits = c(0, 430)) + theme(axis.text = element_text(size = 8)) + geom_point(data = abundance_2022, aes(colour = "black")) + geom_line(data = abundance_2022, aes(colour = "black")) + scale_colour_manual(name = "Year", values = c("2002"="darkgrey","2022"="black")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
+
+pois_all %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop") %>% ggplot(aes (x = site, y = individuals, colour = year, group = year)) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_y_continuous(expand = c(0, 0), limits = c(0, 430)) + theme(axis.text = element_text(size = 8)) + scale_colour_manual(name = "Year", values = c("2002"="darkgrey","2022"="black"), labels = c("2002 (n = 1512)","2022 (n = 1189)")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
 
 # ICSZ specific analyses ####
 
 # poisson models for abundance
 
-{pois_2022 <- beet_22_raw %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(c(ID, year, site, replicate, label, individuals)) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
+{pois_2022 <- beet_22_raw %>% select(1:10, morphospecies_6) %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(c(ID, year, site, replicate, label, individuals)) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
 
-  pois_2002 <- beet_02_raw %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(year, site, replicate, individuals) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
+  pois_2002 <- beet_02_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% mutate(individuals = rowSums(across(where(is.numeric)), na.rm=TRUE)) %>% select(year, site, replicate, individuals) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
 
   pois_all <- rbind(pois_2002,pois_2022)
   
@@ -77,34 +79,35 @@ ggplot(abundance_2002, aes (x = site, y = individuals, group = 1, colour = "dark
   pois_all <- left_join(pois_all, enframe(vec), by = c("site" = "name")) %>% rename(altitude = value) %>% mutate(site = as.numeric(as.character(site)))
   pois_all <- merge(pois_all, veg_cover) %>% arrange(year, site) %>% mutate(site = as.factor(site)) %>% rename("exposed_rock" = "rock")
   pois_all <- merge(pois_all,soil_type)%>% arrange(year, site) %>% mutate(site = as.factor(site))
+  rm(pois_2002, pois_2022, vec)
 }
 
-pois_all %>% mutate(site = as.numeric(site)) %>% ggplot(aes(x=site,y=altitude))+geom_smooth(se=FALSE, size = 3, colour = "brown") + scale_x_continuous(breaks = c(1:17), labels = alt_labels) + theme(axis.line = element_line(color='black'),plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank())
+pois_all %>% mutate(site = as.numeric(site)) %>% ggplot(aes(x=site,y=altitude))+geom_smooth(se=FALSE, linewidth = 3, colour = "brown", method = "loess", formula = "y ~ x") + scale_x_continuous(breaks = c(1:17), labels = alt_labels) + theme(axis.line = element_line(color='black'),plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank())
 
 m_0 <- glm(individuals ~ year, data = pois_all, family = poisson)
 
 for (k in 1:length(unique(pois_all$site))){
   m <- glm(individuals[site == k] ~ year[site == k], data = pois_all, family = poisson)
   assign(paste0("m_", k), m)
-  rm(m,k)
+  rm(k, m)
 }
 
 summary(m_0) # *** --
-summary(m_1) # *** --
-summary(m_2) # ** ++
-summary(m_3) # * ++
-summary(m_4) # x
+summary(m_1) # x
+summary(m_2) # *** ++
+summary(m_3) # *** ++
+summary(m_4) # * ++
 summary(m_5) # ** --
-summary(m_6) # x
+summary(m_6) # * --
 summary(m_7) # x
 summary(m_8) # *** --
 summary(m_9) # *** --
 summary(m_10) # *** --
-summary(m_11) # *** ++
+summary(m_11) # x
 summary(m_12) # x
 summary(m_13) # x
-summary(m_14) # *** ++
-summary(m_15) # *** ++
+summary(m_14) # x
+summary(m_15) # * ++
 summary(m_16) # x
 summary(m_17) # x
 
@@ -117,13 +120,11 @@ summary(m_17) # x
 # bin_1 <- glm(change ~ tempchange, family = "binomial", data = df_0)
 # summary(bin_1)
 
-predict(m_0, newdata = data.frame(year = "2022"), type = "response")
-
 # reducing data to most affected sites
 
-reduced_2022 <- beet_22_raw %>% filter(site %in% c("8","9","10"))
+reduced_2022 <- beet_22_raw %>% select(1:10, morphospecies_6) %>% filter(site %in% c("8","9","10"))
 
-reduced_2002 <- beet_02_raw %>% filter(site %in% c("8","9","10"))
+reduced_2002 <- beet_02_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% filter(site %in% c("8","9","10"))
 
 {x <- mapply(sum,reduced_2022[,-c(1:8)])
   red_species_22 <- cbind(read.table(text = names(x)), x)
@@ -138,11 +139,15 @@ reduced_2002 <- beet_02_raw %>% filter(site %in% c("8","9","10"))
   rm(x)}
 
 
-red_species_22 %>% filter(individuals > 0) %>% arrange(individuals) # ordered descendingly
+red_species_22 %>% filter(individuals > 0) %>% arrange(individuals) 
 red_species_22 %>% summarise(individuals = sum(individuals))
 
 red_species_02 %>% filter(individuals > 0) %>% arrange(individuals)
-red_species_02 %>% summarise(individuals = sum(individuals))
+red_species_02 %>% summarise(individuals = sum(individuals)) # 60% loss in abundance in focus sites
+
+# Anthia, 20% increase generally, 44% decline locally
+# Stenocara, 53% increase generally, 26% increase locally
+# Zophosis, 44% decline generally, 82% decline locally
 
 # selecting the three primary species to conduct hypothesis tests
 
@@ -190,19 +195,12 @@ vec <- c("1" = 0, "2" = 200, "3" = 300, "4" = 500, "5" = 700, "6" = 900, "7" = 1
 shifts_all <- left_join(shifts_all, enframe(vec), by = c("site" = "name")) %>% rename(altitude = value) %>% mutate(site = as.numeric(site)) %>% mutate(site = as.factor(site))
 rm(shifts_02, shifts_22, vec)}
 
-shifts_all %>% group_by(year, site) %>%  summarise(anthia_decemguttata = sum(anthia_decemguttata), .groups = "drop") %>% ggplot(aes (x = site, y = anthia_decemguttata, group = year, colour = year)) + scale_colour_manual(name = "Year", values = c("2002" = "darkgrey", "2022" = "black")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8)) + theme(axis.text = element_text(size = 8)) + theme(legend.position = "inside", legend.position.inside = c(.9, .9))
+shifts_all %>% group_by(year, site) %>%  summarise(anthia_decemguttata = sum(anthia_decemguttata), .groups = "drop") %>% ggplot(aes (x = site, y = anthia_decemguttata, group = year, colour = year)) + scale_colour_manual(name = "Year", values = c("2002" = "darkgrey", "2022" = "black"), labels = c("2002 (n = 225)","2022 (n = 271)")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8)) + theme(axis.text = element_text(size = 8)) + theme(legend.position = "inside", legend.position.inside = c(.9, .9)) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
 
-# shifts_all %>% group_by(year, site) %>%  summarise(stenocara_dentata = sum(stenocara_dentata), .groups = "drop") %>% ggplot(aes (x = site, y = stenocara_dentata, colour = year, group = year)) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8))
-# 
-shifts_all %>% group_by(year, site) %>%  summarise(zophosis_gracilicornis = sum(zophosis_gracilicornis), .groups = "drop") %>% ggplot(aes (x = site, y = zophosis_gracilicornis, colour = year, group = year)) + scale_colour_manual(name = "Year", values = c("2002" = "darkgrey", "2022" = "black")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8)) + theme(legend.position = "inside", legend.position.inside = c(.9, .9))
-# 
-# xx <- shifts_all %>% group_by(year, altitude) %>% summarise(across(c(anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis), sum), .groups = "drop") %>% select(year, altitude, anthia_decemguttata) %>% rename(abundance = anthia_decemguttata)
-# 
-# xx <- shifts_all %>% group_by(year, altitude) %>% summarise(across(c(anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis), sum), .groups = "drop") %>% select(year, altitude, stenocara_dentata) %>% rename(abundance = stenocara_dentata)
-# 
-# xx <- shifts_all %>% group_by(year, altitude) %>% summarise(across(c(anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis), sum), .groups = "drop") %>% select(year, altitude, zophosis_gracilicornis) %>% rename(abundance = zophosis_gracilicornis)
-# 
-# wtd.t.test(xx$altitude[xx$year==2002], xx$altitude[xx$year==2002], weight = xx$abundance[xx$year==2002], weighty = xx$abundance[xx$year==2022])
+shifts_all %>% group_by(year, site) %>%  summarise(stenocara_dentata = sum(stenocara_dentata), .groups = "drop") %>% ggplot(aes (x = site, y = stenocara_dentata, group = year, colour = year)) + scale_colour_manual(name = "Year", values = c("2002" = "darkgrey", "2022" = "black"), labels = c("2002 (n = 203)","2022 (n = 311)")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8)) + theme(axis.text = element_text(size = 8)) + theme(legend.position = "inside", legend.position.inside = c(.9, .9)) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
+
+shifts_all %>% group_by(year, site) %>%  summarise(zophosis_gracilicornis = sum(zophosis_gracilicornis), .groups = "drop") %>% ggplot(aes (x = site, y = zophosis_gracilicornis, colour = year, group = year)) + scale_colour_manual(name = "Year", values = c("2002" = "darkgrey", "2022" = "black"), labels = c("2002 (n = 1084)","2022 (n = 607)")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8)) + theme(legend.position = "inside", legend.position.inside = c(.9, .9)) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
+
 
 # glms to see if the altitudinal range of these species are moving by year
 
@@ -212,7 +210,7 @@ shifts_all %>% filter(year==2022) %>% summarise(zophosis_gracilicornis = sum(zop
 
 shifts_all %>% filter(year==2022) %>% summarise(zophosis_gracilicornis = sum(zophosis_gracilicornis[altitude<950]))
 
-m_a_0 <- glm(anthia_decemguttata ~ altitude+year, data = shifts_all, family = poisson)
+m_a_0 <- glm(anthia_decemguttata ~ altitude + year, data = shifts_all, family = poisson)
 summary(m_a_0)
 
 m_s_0 <- glm(stenocara_dentata ~ altitude+year, data = shifts_all, family = poisson)
@@ -255,7 +253,6 @@ for (k in 1:length(unique(beet_22_raw$site))){
   {if (k == length(unique(beet_22_raw$site))){rm(dat, k)}}
 }
 
-
 datetest <- temp_sites %>% unite(datetime, c(year, month,day), sep = "-", remove = FALSE) %>% unite(datetime, c(datetime,time), sep = " ", remove = TRUE) %>% mutate(datetime = as_datetime(datetime, format="%Y-%m-%d %H:%M", tz = "Africa/Johannesburg"))
 
 datetest %>% filter(year > 2002, year < 2020, site %in% c(1,5,8,9,10)) %>% ggplot(aes(x = datetime, y = temperature)) + geom_smooth(aes(datetime, colour = "1"), formula = y ~ x, method = lm, se = T)
@@ -265,7 +262,7 @@ datetest %>% filter(year < 2020, year > 2002) %>% group_by(year,site, month) %>%
 
 datetest %>% group_by(site,year) %>% summarise(temperature = mean(temperature)) %>% filter(site %in% c(15,8,9,10), year < 2020, year > 2002) %>% ggplot(aes(x = year, y = temperature, color = temperature)) + geom_point() + geom_smooth(color = "red", se = FALSE) + scale_color_gradient(name = "ºC", low = datacamp_colors$blue, high = datacamp_colors$pink) + ggtitle("Temperature", subtitle = "Visualization using theme_datacamp()") + xlab("Year") + ylab("Mean Temperature")
 
-for (k in (1:17)){m_t <- datetest %>% filter(year > 2002, year < 2020, site == k) %>% lm(data = ., temperature ~ year)
+for (k in (1:17)){m_t <- datetest %>% filter(year > 2002, year < 2021, site == k) %>% lm(data = ., temperature ~ year)
 summary(m_t)
 {if (k == 1){x1 <- predict(m_t, newdata = data.frame(year = c(2002,2022)))}}
 {if (k == 1){x1 <- diff(x1)}}
@@ -277,44 +274,11 @@ summary(m_t)
 {if (k==17){rm(k)}}
 }
 
-x1 %>% ggplot(aes(x = site, y = X2)) + geom_point(aes(colour = as.factor(c(1,-1,-1,-1,1,-1,-1,1,1,1,-1,-1,-1,-1,-1,-1,-1))), size = 3, show.legend = FALSE) + ylab("Change in MAT (°C)") + xlab("Site") + scale_x_discrete(label = c(1:17)) + geom_line(y=0, group = 1) + scale_colour_manual(name = "Year", values = c("-1" = "grey", "1" = "purple"))
+x1 %>% ggplot(aes(x = site, y = X2)) + geom_point(aes(colour = as.factor(sign(X2))), size = 5, show.legend = FALSE, alpha = 0.6) + ylab("Change in MAT (°C)") + xlab("Site") + scale_x_discrete(label = c(1:17)) + geom_line(y=0, group = 1) + scale_colour_manual(name = "Year", values = c("-1" = "blue", "1" = "red")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
 
-# 1 
-# 1.820231 ***
-# 2 
-# -0.3082766 ***
-# 3 
-# 1.443036 ***
-# 4 
-# -0.9419454 ***
-# 5 
-# 1.88613 ***
-# 6 
-# -0.6029879 ***
-# 7 
-# -0.8938745 
-# 8 
-# 0.6510311 
-# 9 
-# 1.911778 
-# 10 
-# 0.6620972 ***
-# 11 
-# -0.4971267 ***
-# 12 
-# 0.1421047 
-# 13 
-# 0.007423464 
-# 14 
-# 1.508936 ***
-# 15 
-# -1.934733 ***
-# 16 
-# -0.470808 ***
-# 17 
-# 1.748798 ***
+x1 %>% ggplot(aes(x = site, y = X2)) + geom_point(aes(colour = as.factor(c(-1,-1,-1,-1,1,-1,-1,1,1,1,-1,-1,-1,-1,-1,-1,-1))), size = 5, show.legend = FALSE, alpha = 0.6) + ylab("Change in MAT (°C)") + xlab("Site") + scale_x_discrete(label = c(1:17)) + geom_line(y= 0, group = 1) + scale_colour_manual(name = "Year", values = c("-1" = "grey", "1" = "red")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
 
-{k <- c(1,5,8,9,10)
+{k <- c(5,8,9,10)
 m_t <- datetest %>% filter(year > 2002, year < 2020, site %in% k) %>% lm(data = ., temperature ~ year + site)
 rm(k)
 summary(m_t)
@@ -334,11 +298,11 @@ summary(m_s_r)
 
 m_s_c <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., clay ~ year + site)
 summary(m_s_c)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay")
+soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay") + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ theme(axis.title.x = element_blank(), axis.text.x=element_blank(), axis.ticks.x = element_blank(), legend.position = "none")
 
-m_s_b <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., sand ~ year + site)
+m_s_b <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = .come , sand ~ year + site)
 summary(m_s_b)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand")
+soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand") + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ theme(axis.title.x = element_blank(), axis.text.x=element_blank(), axis.ticks.x = element_blank(), legend.position = "inside", legend.position.inside = c(0.9, 0.9)) + labs(fill = NULL)
 
 m_s_s <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., silt ~ year + site)
 summary(m_s_s)
@@ -359,11 +323,12 @@ summary(m_s_r)
 
 m_s_c <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., clay ~ year + site)
 summary(m_s_c)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay")
+soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay") + theme_minimal(base_size = 22) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .95)) + labs(fill = "Year")
 
 m_s_b <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., sand ~ year + site)
 summary(m_s_b)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand")
+soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand") + theme_minimal(base_size = 22) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .95)) + labs(fill = "Year")
+
 
 m_s_s <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., silt ~ year + site)
 summary(m_s_s)
