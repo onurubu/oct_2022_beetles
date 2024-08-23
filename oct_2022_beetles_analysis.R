@@ -213,7 +213,7 @@ shifts_all %>% filter(year==2022) %>% summarise(zophosis_gracilicornis = sum(zop
 m_a_0 <- glm(anthia_decemguttata ~ altitude + year, data = shifts_all, family = poisson)
 summary(m_a_0)
 
-m_s_0 <- glm(stenocara_dentata ~ altitude+year, data = shifts_all, family = poisson)
+m_s_0 <- glm(stenocara_dentata ~ altitude + year, data = shifts_all, family = poisson)
 summary(m_s_0)
 
 m_z_0 <- glm(zophosis_gracilicornis ~ altitude*year, data = shifts_all, family = poisson)
