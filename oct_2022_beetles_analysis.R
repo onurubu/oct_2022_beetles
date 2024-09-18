@@ -86,6 +86,9 @@ pois_all %>% mutate(site = as.numeric(site)) %>% ggplot(aes(x=site,y=altitude))+
 
 m_0 <- glm(individuals ~ year, data = pois_all, family = poisson)
 
+m_soil <- pois_all %>% filter(site %in% c(5,8,9,10)) %>% glm(data = ., individuals ~ year*clay*sand, family = poisson)
+summary(m_soil)
+
 for (k in 1:length(unique(pois_all$site))){
   m <- glm(individuals[site == k] ~ year[site == k], data = pois_all, family = poisson)
   assign(paste0("m_", k), m)
@@ -200,6 +203,14 @@ shifts_all %>% group_by(year, site) %>%  summarise(anthia_decemguttata = sum(ant
 shifts_all %>% group_by(year, site) %>%  summarise(stenocara_dentata = sum(stenocara_dentata), .groups = "drop") %>% ggplot(aes (x = site, y = stenocara_dentata, group = year, colour = year)) + scale_colour_manual(name = "Year", values = c("2002" = "darkgrey", "2022" = "black"), labels = c("2002 (n = 203)","2022 (n = 311)")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8)) + theme(axis.text = element_text(size = 8)) + theme(legend.position = "inside", legend.position.inside = c(.9, .9)) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
 
 shifts_all %>% group_by(year, site) %>%  summarise(zophosis_gracilicornis = sum(zophosis_gracilicornis), .groups = "drop") %>% ggplot(aes (x = site, y = zophosis_gracilicornis, colour = year, group = year)) + scale_colour_manual(name = "Year", values = c("2002" = "darkgrey", "2022" = "black"), labels = c("2002 (n = 1084)","2022 (n = 607)")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_x_discrete(label = alt_labels) + theme(axis.text = element_text(size = 8)) + theme(legend.position = "inside", legend.position.inside = c(.9, .9)) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
+
+# mean abundance
+
+shifts_all %>% group_by(site, replicate, year) %>% summarise( individuals = anthia_decemguttata + stenocara_dentata + zophosis_gracilicornis, .groups = "drop") %>% group_by(year, site) %>% summarise(individuals = mean(individuals), .groups = "drop") %>% ggplot(aes (x = site, y = individuals, colour = year, group = year)) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of individual beetles") + scale_y_continuous(expand = c(0, 0), limits = c(0, 430)) + theme(axis.text = element_text(size = 8)) + scale_colour_manual(name = "Year", values = c("2002"="darkgrey","2022"="black"), labels = c("2002 (n = 1512)","2022 (n = 1189)")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
+
+xxx <- shifts_all %>% group_by(site, replicate, year) %>% summarise( individuals = anthia_decemguttata + stenocara_dentata + zophosis_gracilicornis, .groups = "drop") %>% group_by(year, site) %>% summarise(individuals = mean(individuals), .groups = "drop") %>% filter(site %in% c(8,9,10))
+
+t.test(x = xxx$individuals[xxx$year == 2002], y = xxx$individuals[xxx$year == 2022], alternative = "greater", paired = TRUE)
 
 
 # glms to see if the altitudinal range of these species are moving by year
