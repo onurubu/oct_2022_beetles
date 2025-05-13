@@ -18,9 +18,9 @@ beet_22_fullraw <- read.csv("family_separated_ceder_beetles_2022.csv", stringsAs
 
 beet_23_fullraw <- read.csv("oct_2023_beetle_abundance.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, year, label), factor))
 
-beet_02_raw <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% filter(year == 2002)
+beet_02_raw <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% filter(year == 2002) %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% rename(zophosis_gracilicornis = Zophosis.sp.1, anthia_decemguttata = Thermophilum.decemguttatum, stenocara_dentata = Stenocara.dentata)
 
-beet_03_raw <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% filter(year == 2003)
+beet_03_raw <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% filter(year == 2003) %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% rename(zophosis_gracilicornis = Zophosis.sp.1, anthia_decemguttata = Thermophilum.decemguttatum, stenocara_dentata = Stenocara.dentata)
 
 # reducing all entries of modern samples to 1 row per unique ID and also filling in empty IDs
 
@@ -82,74 +82,41 @@ for (k in 1:length(missID)){
     {if (k == length(missID)){rm(i, r, r_list, s, s_list, t, t_list, i_list, label_list)}}
     {if (k == length(missID)){beet_23_raw <- beet_23_fullraw %>% bind_rows(miss_labels) %>% arrange(as.numeric(as.character(ID)))}}
     {if (k == length(missID)){rm(miss_labels, missID, k, beet_23_fullraw)}}
-  }}}
-
-# calculating the number of individual specimens found for each morphospecies/species
-
-{x <- beet_22_raw %>% filter(year == "2022")
-  x <- mapply(sum, x[,-c(1:6)])
-species_22 <- cbind(read.table(text = names(x)), x)
-rownames(species_22) <- NULL
-colnames(species_22) <- c("morphospecies", "individuals")
-rm(x)}
-
-{x <- beet_23_raw
-  x <- mapply(sum, x[,-c(1:6)])
-  species_23 <- cbind(read.table(text = names(x)), x)
-  rownames(species_23) <- NULL
-  colnames(species_23) <- c("morphospecies", "individuals")
-  rm(x)}
-
-{x <- beet_02_raw %>% filter(year == "2002")
-  x <- mapply(sum, x[,-c(1:4)])
-  species_02 <- cbind(read.table(text = names(x)), x)
-  rownames(species_02) <- NULL
-  colnames(species_02) <- c("morphospecies", "individuals")
-  rm(x)}
-
-{x <- beet_03_raw %>% filter(year == "2003")
-  x <- mapply(sum, x[,-c(1:4)])
-  species_03 <- cbind(read.table(text = names(x)), x)
-  rownames(species_03) <- NULL
-  colnames(species_03) <- c("morphospecies", "individuals")
-  rm(x)}
-
-species_22 %>% arrange(individuals)
-species_22 %>% summarise(individuals = sum(individuals))
-
-species_23 %>% arrange(individuals)
-species_23 %>% summarise(individuals = sum(individuals))
-
-species_02 %>%  arrange(individuals)
-species_02 %>% summarise(individuals = sum(individuals)) # 21% loss in abundance overall
-
-species_03 %>%  arrange(individuals)
-species_03 %>% summarise(individuals = sum(individuals))
-
-# calculating number of individual insects found per altitudinal site
-
-{abundance_2022 <- beet_22_raw %>% filter(year == "2022") %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(c(ID, year, site, label, individuals)) %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop")
-
-abundance_2002 <- beet_02_raw %>% filter(year == "2002") %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, individuals) %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop")
-
-abundance_2003 <- beet_03_raw %>% filter(year == "2003") %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, individuals) %>% group_by(year, site) %>% summarise(individuals = sum(individuals), .groups = "drop")
-
-abundance_all <- rbind(abundance_2002, abundance_2003, abundance_2022)}
+  }}
+  beet_22_raw <- beet_22_raw %>% select(1:9) %>% rename(zophosis_gracilicornis = morphospecies_6)
+  beet_23_raw <- beet_23_raw %>% select(1:9) %>% rename(zophosis_gracilicornis = morphospecies_6)
+}
 
 # calculating mean abundance
 
-m_abund_2022 <- beet_22_raw %>% select(1:9) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
+m_abund_2022 <- beet_22_raw %>% select(1:9) %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), mean), .groups = "drop")
+
+m_all_abund_2022 <- m_abund_2022 %>% mutate(mean_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, mean_abundance)
 
 # m_abund_2022 <- beet_22_raw %>% select(1:9) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
 
-m_abund_2023 <- beet_23_raw %>% select(1:9) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
+m_abund_2023 <- beet_23_raw %>% select(1:9) %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), mean), .groups = "drop")
+
+m_all_abund_2023 <- m_abund_2023 %>% mutate(mean_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, mean_abundance)
 
 # %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop") %>% group_by(year, site) %>% summarise(ave_abundance = mean(individuals), .groups = "drop")
 
-m_abund_2002 <- beet_02_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, individuals)
+# calculating total abundance
+
+t_abund_2022 <- beet_22_raw %>% select(1:9) %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), sum), .groups = "drop")
+
+t_abund_2023 <- beet_23_raw %>% select(1:9) %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), sum), .groups = "drop")
+
+t_abund_2002 <- beet_02_raw %>% select(year, site, replicate, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
+
+t_abund_2003 <- beet_03_raw %>% select(year, site, replicate, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
+
+# calculate the total across all taxa
+
+o_abund_2002 <- beet_02_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, individuals)
 #%>% group_by(year, site) %>% summarise(ave_abundance = mean(individuals), .groups = "drop")
 
-m_abund_2003 <- beet_03_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, individuals)
+o_abund_2003 <- beet_03_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, individuals)
 
 ### Trying models
   
