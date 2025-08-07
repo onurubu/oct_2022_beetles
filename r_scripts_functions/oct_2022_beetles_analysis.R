@@ -10,16 +10,20 @@ library(tidyverse)
 library(weights)
 library(emmeans)
 library(EnvStats)
+library(sf)
+library(hms)
 
 # reading in raw data with correct data types
 
-beet_22_raw <- read.csv("family_seperated_ceder_beetle_diversity_october_2022.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, label, season, year, full_label), factor))
+beet_22_raw <- read.csv("beet_wern_ID.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, label, season, year), factor)) %>% filter(year == "2022")
 
-beet_02_raw <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor))
+beet_22_raw <- read.csv("ceder_beetles_2022.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, label, season, year, full_label), factor))
+
+beet_02_raw <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% filter(year == "2002")
 
 # calculating the number of individual specimens found for each morphospecies/species
 
-{x <- mapply(sum, beet_22_raw[,-c(1:8)])
+{x <- mapply(sum, beet_22_raw[,-c(1:7)])
 species_22 <- cbind(read.table(text = names(x)), x)
 rownames(species_22) <- NULL
 colnames(species_22) <- c("morphospecies", "individuals")
@@ -45,9 +49,13 @@ abundance_2002 <- beet_02_raw %>% mutate(individuals = rowSums(across(c(Thermoph
 
 # calculating species diversity per site
 
-diversity_2022 <- beet_22_raw %>% group_by(site) %>% summarise(across(where(is.numeric), sum)) %>% mutate_if(is.numeric, ~1 * (. > 0)) %>% mutate(diversity = rowSums(across(where(is.numeric)))) %>% select(c(site, diversity))
+diversity_2022 <- beet_22_raw %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), sum)) %>% mutate_if(is.numeric, ~1 * (. > 0)) %>% mutate(diversity = rowSums(across(where(is.numeric)))) %>% select(c(year, site, replicate, diversity))
 
-diversity_2002 <- beet_02_raw %>% group_by(site) %>% summarise(across(where(is.numeric), sum)) %>% mutate_if(is.numeric, ~1 * (. > 0)) %>% mutate(diversity = rowSums(across(where(is.numeric)))) %>% select(c(site, diversity))
+diversity_2002 <- beet_02_raw %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), sum)) %>% mutate_if(is.numeric, ~1 * (. > 0)) %>% mutate(diversity = rowSums(across(where(is.numeric)))) %>% select(c(year, site, replicate, diversity))
+
+diversity_all <- rbind(diversity_2002, diversity_2022)
+
+diversity_all %>% group_by(year) %>% summarise(diversity = sum(diversity))
 
 # graphs ####
 
@@ -55,7 +63,7 @@ alt_labels <- c("0m(W)","200m(W)","300m(W)","500m(W)","700m(W)","900m(W)","1100m
 
 # species diversity per altitudinal site
 
-ggplot(diversity_2002, aes(x = site, y = diversity, group = 1, colour = "darkgrey")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Total number of morphospecies") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 40)) + theme(axis.text = element_text(size = 8)) + geom_point(data = diversity_2022, aes(colour = "black")) + geom_line(data = diversity_2022, aes(colour = "black")) + scale_colour_manual(name = NULL, values =c("black"="black", "darkgrey"="darkgrey"), labels = c("2022","2002")) + theme(legend.position = "inside", legend.position.inside = c(.9, .9))
+diversity_all %>%  ggplot(aes(x=site, y=diversity, fill=year)) + geom_boxplot() + scale_fill_manual(name = "Year", values = c("darkgrey", "#544441"))+ theme(legend.position = "inside", legend.position.inside = c(.9, .8), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10), axis.line.x = element_line(linewidth = 0.3), axis.line.y = element_line(linewidth = 0.3)) + xlab("Altitudinal site") + ylab("Species richness per site") + scale_y_continuous(expand = c(0, 0), limits = c(0, 11))
 
 # individual insects per altitudinal site
 
@@ -294,6 +302,25 @@ m_t <- datetest %>% filter(year > 2002, year < 2020, site %in% k) %>% lm(data = 
 rm(k)
 summary(m_t)
 }
+
+# temperature analyses to compare microclim
+
+temp_sites_bak <- temp_sites
+temp_sites <- temp_sites_bak
+
+
+temp_sites$time <- as.character(temp_sites$time)
+temp_sites <- temp_sites %>% mutate(time = as_datetime(time, format="%H:%M"))
+temp_sites$time <- as_hms(temp_sites$time)
+
+timesofday <- read.csv("./microclim_comparisons/TimesOfDay.csv")
+timesofday <- timesofday %>% mutate(daytime = as_datetime(daytime, format="%H:%M"))
+timesofday$daytime <- as_hms(timesofday$daytime)
+
+
+
+temp_sites %>% filter(site == 2, year == 2019)%>% ggplot(aes(x=time,y = temperature)) + geom_smooth(se=FALSE, linewidth = 1, colour = "brown", method = "loess", formula = "y ~ x") + scale_x_continuous(breaks = timesofday$daytime, labels = c(0:23)) + theme(axis.line = element_line(color='black'),plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank())
+
 
 # vegetation and soil analyses
 

@@ -87,19 +87,19 @@ for (k in 1:length(missID)){
   beet_23_raw <- beet_23_raw %>% select(1:9) %>% rename(zophosis_gracilicornis = morphospecies_6)
 }
 
-# calculating mean abundance
+# calculating mean abundance within taxa and across taxa
 
 m_abund_2022 <- beet_22_raw %>% select(1:9) %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), mean), .groups = "drop")
-
 m_all_abund_2022 <- m_abund_2022 %>% mutate(mean_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, mean_abundance)
 
-# m_abund_2022 <- beet_22_raw %>% select(1:9) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop")
-
 m_abund_2023 <- beet_23_raw %>% select(1:9) %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), mean), .groups = "drop")
-
 m_all_abund_2023 <- m_abund_2023 %>% mutate(mean_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, mean_abundance)
 
-# %>% group_by(year, site, replicate) %>% summarise(individuals = sum(individuals), .groups = "drop") %>% group_by(year, site) %>% summarise(ave_abundance = mean(individuals), .groups = "drop")
+m_abund_2002 <- beet_02_raw %>% mutate(across(where(is.numeric), ~ .*0.1)) %>% select(year, site, replicate, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
+m_all_abund_2002 <- m_abund_2002 %>% mutate(mean_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, mean_abundance)
+
+m_abund_2003 <- beet_03_raw %>% mutate(across(where(is.numeric), ~ .*0.1)) %>% select(year, site, replicate, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
+m_all_abund_2003 <- m_abund_2003 %>% mutate(mean_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, mean_abundance)
 
 # calculating total abundance
 
@@ -111,27 +111,43 @@ t_abund_2002 <- beet_02_raw %>% select(year, site, replicate, anthia_decemguttat
 
 t_abund_2003 <- beet_03_raw %>% select(year, site, replicate, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
 
-# calculate the total across all taxa
+# calculate the total abundance across all taxa
 
-o_abund_2002 <- beet_02_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, individuals)
-#%>% group_by(year, site) %>% summarise(ave_abundance = mean(individuals), .groups = "drop")
+t_all_abund_2022 <- t_abund_2022 %>% group_by(year, site, replicate) %>% mutate(total_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, total_abundance)
 
-o_abund_2003 <- beet_03_raw %>% select(1:4, Thermophilum.decemguttatum, Stenocara.dentata, Zophosis.sp.1) %>% mutate(individuals = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, individuals)
+t_all_abund_2023 <- t_abund_2023 %>% group_by(year, site, replicate) %>% mutate(total_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, total_abundance)
 
-### Trying models
-  
-m_abund_all <- rbind(m_abund_2002, m_abund_2022)
+t_all_abund_2002 <- beet_02_raw %>% mutate(total_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, total_abundance)
 
-m_ave <- m_abund_all %>% lm(data = ., individuals ~ year + site)
+t_all_abund_2003 <- beet_03_raw %>% mutate(total_abundance = rowSums(across(where(is.numeric)))) %>% select(year, site, replicate, total_abundance)
+
+# collating data from all years into single data frames
+
+{t_abund <- rbind(t_abund_2002, t_abund_2003, t_abund_2022, t_abund_2023)
+rm(t_abund_2002, t_abund_2003, t_abund_2022, t_abund_2023)}
+
+{t_all_abund <- rbind(t_all_abund_2002, t_all_abund_2003, t_all_abund_2022, t_all_abund_2023)
+  rm(t_all_abund_2002, t_all_abund_2003, t_all_abund_2022, t_all_abund_2023)}
+
+{m_abund <- rbind(m_abund_2002, m_abund_2003, m_abund_2022, m_abund_2023)
+rm(m_abund_2022, m_abund_2023, m_abund_2002, m_abund_2003)}
+
+{m_all_abund <- rbind(m_all_abund_2002, m_all_abund_2003, m_all_abund_2022, m_all_abund_2023)
+  rm(m_all_abund_2022, m_all_abund_2023, m_all_abund_2002, m_all_abund_2003)}
+
+### Analyses ####
+# Trying models
+
+m_ave <- m_all_abund %>% lm(data = ., mean_abundance ~ year)
 summary(m_ave)
 
-predict(m_ave, newdata = data.frame(year = c("2002")))
+m_all_abund %>% plot(data = ., mean_abundance[year == 2022] ~ site[year == 2022])
 
-m_abund_all %>% plot(data = ., individuals[year == 2022] ~ site[year == 2022])
+alt_labels <- c("0m(W)","200m(W)","300m(W)","500m(W)","700m(W)","900m(W)","1100m(W)","1300m(W)","1500m(W)","1700m(W)","1900m(W)","1700m(E)","1500m(E)","1300m(E)","1100m(E)","900m(E)","500m(E)")
 
-m_abund_all %>%  ggplot(aes(x=site, y=individuals, fill=year)) + geom_boxplot() + scale_fill_manual(name = "Year", values = c("grey", "#544441")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10)) + xlab("Altitudinal site") + ylab("Mean abundance per site") + scale_y_continuous(expand = c(0, 0), limits = c(0, 150))
+m_all_abund %>%  ggplot(aes(x=site, y=mean_abundance, fill=year)) + geom_boxplot() + scale_fill_manual(name = "Year", values = c("grey", "red", "green", "blue")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10)) + xlab("Altitudinal site") + ylab("Mean abundance per site") + scale_y_continuous(expand = c(0, 0), limits = c(0, 30))
 
-shifts_all %>% select(site, replicate, year, zophosis_gracilicornis) %>% ggplot(aes(x=site, y=zophosis_gracilicornis, fill=year)) + geom_boxplot() + scale_fill_manual(name = "Year", values = c("grey", "#544441")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10)) + xlab("Altitudinal site") + ylab("Mean abundance per site") + scale_y_continuous(expand = c(0, 0), limits = c(0, 100))
+m_abund %>% select(site, replicate, year, zophosis_gracilicornis) %>% ggplot(aes(x=site, y=zophosis_gracilicornis, fill=year)) + geom_boxplot() + scale_fill_manual(name = "Year", values = c("grey", "red", "green", "blue")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10)) + xlab("Altitudinal site") + ylab("Mean abundance per site") + scale_y_continuous(expand = c(0, 0), limits = c(0, 25))
 
 shifts_all %>% select(site, replicate, year, anthia_decemguttata) %>% ggplot(aes(x=site, y=anthia_decemguttata, fill=year)) + geom_boxplot() + scale_fill_manual(name = "Year", values = c("grey", "#544441")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10)) + xlab("Altitudinal site") + ylab("Mean abundance per site") + scale_y_continuous(expand = c(0, 0), limits = c(0, 45))
 
@@ -149,9 +165,7 @@ diversity_2002 <- beet_02_raw %>% filter(year == "2002") %>% group_by(site) %>% 
 
 diversity_2003 <- beet_03_raw %>% filter(year == "2003") %>% group_by(site) %>% summarise(across(where(is.numeric), sum)) %>% mutate_if(is.numeric, ~1 * (. > 0)) %>% mutate(diversity = rowSums(across(where(is.numeric)))) %>% select(c(site, diversity))
 
-# graphs ####
-
-alt_labels <- c("0m(W)","200m(W)","300m(W)","500m(W)","700m(W)","900m(W)","1100m(W)","1300m(W)","1500m(W)","1700m(W)","1900m(W)","1700m(E)","1500m(E)","1300m(E)","1100m(E)","900m(E)","500m(E)")
+# graphs
 
 # species diversity per altitudinal site
 
@@ -166,13 +180,6 @@ pois_all %>% filter(year %in% c(2002,2022)) %>% group_by(year, site) %>% summari
 # mean abundance graph
 
 ggplot(m_abund_2002, aes(x = site, y = ave_abundance, group = 1, colour = "darkgrey")) + geom_point() + geom_line() + xlab("Altitudinal site") + ylab("Mean abundance") + scale_x_discrete(label = alt_labels) + scale_y_continuous(expand = c(0, 0), limits = c(0, 110)) + theme(axis.text = element_text(size = 8)) + geom_point(data = m_abund_2022, aes(colour = "black")) + geom_line(data = m_abund_2022, aes(colour = "black")) + scale_colour_manual(name = NULL, values =c("black"="black", "darkgrey"="darkgrey"), labels = c("2022 (n = 1179)","2002 (n = 2180)")) + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .8)) + scale_x_discrete(label = alt_labels) + theme(axis.text.x = element_text(size = 10))
-
-
-# analyses for Research day ####
-
-beet_22_raw %>% summarise(individuals = sum(morphospecies_29))
-beet_02_raw %>% summarise(individuals = sum(Cicindela.brevicollis))
-
 
 # ICSZ specific analyses ####
 
@@ -364,7 +371,7 @@ summary(m_z_1)}
 # wtd.t.test(shifts_raw$altitude[shifts_raw$year==2002], shifts_raw$altitude[shifts_raw$year==2022], weight = shifts_raw$individuals[shifts_raw$year==2002], weighty = shifts_raw$individuals[shifts_raw$year==2022])
 
 
-# climate analyses begin
+# Environmental analyses ####
 
 for (k in 1:length(unique(beet_22_raw$site))){
   dat <-  read.csv(file = paste0("./climate_data/climate_site_", k , ".csv"))
@@ -380,9 +387,7 @@ for (k in 1:length(unique(beet_22_raw$site))){
   {if (k == length(unique(beet_22_raw$site))){rm(dat, k)}}
 }
 
-datetest <- temp_sites %>% unite(datetime, c(year, month,day), sep = "-", remove = FALSE) %>% unite(datetime, c(datetime,time), sep = " ", remove = TRUE) %>% mutate(datetime = as_datetime(datetime, format="%Y-%m-%d %H:%M", tz = "Africa/Johannesburg"))
-
-datetest %>% filter(year > 2002, year < 2020, site %in% c(1,5,8,9,10)) %>% ggplot(aes(x = datetime, y = temperature)) + geom_smooth(aes(datetime, colour = "1"), formula = y ~ x, method = lm, se = T)
+datetest <- temp_sites %>% unite(datetime1, c(year, month,day), sep = "-", remove = FALSE) %>% unite(datetime, c(datetime1,time), sep = " ", remove = FALSE) %>% select(-datetime1) %>% mutate(datetime = as_datetime(datetime, format="%Y-%m-%d %H:%M", tz = "Africa/Johannesburg"))
 
 datetest %>% ggplot(aes(x = datetime, y = temperature)) + geom_smooth(aes(datetime, colour = "1"), formula = y ~ x, method = lm, se = T)
 
@@ -391,6 +396,8 @@ datetest %>% group_by(year,month,day) %>% mutate(maxtemp = max(temperature)) %>%
 datetest %>% filter(site = "1") group_by(year,month,day) %>% mutate(maxtemp = max(temperature)) %>% ggplot(aes(x = datetime, y = maxtemp)) + geom_smooth(aes(datetime, colour = "1"), formula = y ~ x, method = lm, se = T)
 
 datetest %>% group_by(year) %>% summarise(maxtemp = max(temperature)) %>% ggplot(aes(x = year, y = maxtemp)) + geom_smooth(aes(year, colour = "1"), formula = y ~ x, method = lm, se = T)
+
+datetest %>% filter(year %in% c(2002, 2003, 2022, 2023)) %>% group_by(year, site) %>% summarise(maxtemp = max(temperature), .groups = "drop") %>% mutate(year = as.factor(year)) %>% ggplot(aes(x = site, y = maxtemp, fill = year)) + geom_point(aes(colour = year), position = "jitter")
 
 m_maxT <- datetest %>% group_by(year,month,day) %>% mutate(maxtemp = max(temperature)) %>% lm(data = ., maxtemp ~ datetime)
 
@@ -426,58 +433,58 @@ rm(k)
 summary(m_t)
 }
 
-# vegetation and soil analyses
-
-# soil
-
-m_s_ph <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., ph ~ year + site)
-summary(m_s_ph)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,ph)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
-
-
-m_s_r <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., rock ~ year + site)
-summary(m_s_r)
-
-m_s_c <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., clay ~ year + site)
-summary(m_s_c)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay") + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ theme(axis.title.x = element_blank(), axis.text.x=element_blank(), axis.ticks.x = element_blank(), legend.position = "none")
-
-m_s_b <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = .come , sand ~ year + site)
-summary(m_s_b)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand") + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ theme(axis.title.x = element_blank(), axis.text.x=element_blank(), axis.ticks.x = element_blank(), legend.position = "inside", legend.position.inside = c(0.9, 0.9)) + labs(fill = NULL)
-
-m_s_s <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., silt ~ year + site)
-summary(m_s_s)
-
-soil_type %>% group_by(site) %>% summarise(across(c(ph,rock,clay,sand,silt), diff))
-
-
-# veg
-
-m_s_ph <- pois_all %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., individuals ~ year + vegetation*sand + litter+ bare_ground)
-summary(m_s_ph)
-
-pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,vegetation)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
-pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,bare_ground)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
-
-m_s_r <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., rock ~ year + site)
-summary(m_s_r)
-
-m_s_c <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., clay ~ year + site)
-summary(m_s_c)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay") + theme_minimal(base_size = 22) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .95)) + labs(fill = "Year")
-
-m_s_b <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., sand ~ year + site)
-summary(m_s_b)
-soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand") + theme_minimal(base_size = 22) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .95)) + labs(fill = "Year")
-
-
-m_s_s <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., silt ~ year + site)
-summary(m_s_s)
-
-soil_type %>% group_by(site) %>% summarise(across(c(ph,rock,clay,sand,silt), diff))
-
-temp_sites %>% group_by(year) %>% summarise(maximum_temp = max(temperature), mean_temp = mean(temperature), minimum_temp = min(temperature)) %>% print(n = 21)
+# # vegetation and soil analyses
+# 
+# # soil
+# 
+# m_s_ph <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., ph ~ year + site)
+# summary(m_s_ph)
+# soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,ph)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
+# 
+# 
+# m_s_r <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., rock ~ year + site)
+# summary(m_s_r)
+# 
+# m_s_c <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., clay ~ year + site)
+# summary(m_s_c)
+# soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay") + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ theme(axis.title.x = element_blank(), axis.text.x=element_blank(), axis.ticks.x = element_blank(), legend.position = "none")
+# 
+# m_s_b <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = .come , sand ~ year + site)
+# summary(m_s_b)
+# soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand") + theme_minimal(base_size = 20) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+ theme(axis.title.x = element_blank(), axis.text.x=element_blank(), axis.ticks.x = element_blank(), legend.position = "inside", legend.position.inside = c(0.9, 0.9)) + labs(fill = NULL)
+# 
+# m_s_s <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., silt ~ year + site)
+# summary(m_s_s)
+# 
+# soil_type %>% group_by(site) %>% summarise(across(c(ph,rock,clay,sand,silt), diff))
+# 
+# 
+# # veg
+# 
+# m_s_ph <- pois_all %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., individuals ~ year + vegetation*sand + litter+ bare_ground)
+# summary(m_s_ph)
+# 
+# pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,vegetation)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
+# pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,bare_ground)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
+# 
+# m_s_r <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., rock ~ year + site)
+# summary(m_s_r)
+# 
+# m_s_c <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., clay ~ year + site)
+# summary(m_s_c)
+# soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,clay)) + geom_boxplot(aes(fill=year)) + ylab("Clay compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Clay") + theme_minimal(base_size = 22) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .95)) + labs(fill = "Year")
+# 
+# m_s_b <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., sand ~ year + site)
+# summary(m_s_b)
+# soil_type %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,sand)) + geom_boxplot(aes(fill=year)) + ylab("Sand compisition of soil (%)") + xlab("Year") + stat_n_text() + ggtitle("Sand") + theme_minimal(base_size = 22) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position = "inside", legend.position.inside = c(.9, .95)) + labs(fill = "Year")
+# 
+# 
+# m_s_s <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., silt ~ year + site)
+# summary(m_s_s)
+# 
+# soil_type %>% group_by(site) %>% summarise(across(c(ph,rock,clay,sand,silt), diff))
+# 
+# temp_sites %>% group_by(year) %>% summarise(maximum_temp = max(temperature), mean_temp = mean(temperature), minimum_temp = min(temperature)) %>% print(n = 21)
 
 
 # for (k in 1:length(unique(pois_all$site))){
@@ -485,31 +492,6 @@ temp_sites %>% group_by(year) %>% summarise(maximum_temp = max(temperature), mea
 #   assign(paste0("m_", k), m)
 #   rm(m,k)
 # }
-
-# end of ICSZ analyses
-
-
-
-
-
-
-
-
-# sorting working data ####
-# used to sort morphospecies into boxes
-
-# species_22 %>% filter(individuals < 2) %>%  arrange(individuals)
-
-# edit the morphospecies numbers and sites for the specimens of interest
-
-# beet_22_raw %>% filter(trap != 3) %>% group_by(site) %>% 
-#   summarise(individuals = sum(morphospecies_12)) %>%
-#   filter(individuals > 0)
-
-# individual site samples
-
-# (species_by_site <- beet_22_raw %>% select(ID, site, label, morphospecies_69) %>%
-#   filter(morphospecies_69 > 0))
 
 # Vegetation height initial analyses ####
 
@@ -549,4 +531,23 @@ veg_height %>% ggplot(aes(x = site, y = height_max)) + geom_boxplot()
 TOTHITS <- veg_height %>% group_by(site, replicate) %>% summarise(across(where(is.numeric), sum)) %>% select(-height_max) %>% group_by(site, replicate) %>% summarise(TOTHITS = rowMeans(across(where(is.numeric))))
 
 
+# soil and vegetation analyses
 
+{m_abund_even <- m_abund %>% filter(year %in% c("2002", "2022"))
+soil_2002 <- read.csv("./soil_data_2002.csv")
+soil_2022 <- read.csv("./soil/soil_data_2022_working.csv")
+soil_data <- rbind(soil_2002, soil_2022)
+soil_data <- soil_data %>% mutate(across(c(site, replicate, year), factor))
+m_abund_env <- left_join(m_abund_even, soil_data, by = join_by(year, site, replicate))
+m_abund_env <- m_abund_env %>% rename("rock_comp" = "rock")
+veg_cover <- read.csv("./veg_cover.csv") %>% mutate(across(c(site, replicate, trap, year), factor))
+veg_cover <- veg_cover %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), mean), .groups = "drop")
+m_abund_environmental <- left_join(m_abund_env, veg_cover, by = join_by(year, site, replicate))
+rm(soil_2002, soil_2022, m_abund_even, soil_data, veg_cover, m_abund_env)}
+
+str(m_abund_environmental)
+
+m1 <- m_abund_environmental %>% aov(data = ., anthia_decemguttata ~ (year + site + rock_comp + clay + sand + silt))
+
+summary(m1)
+AIC(m1)

@@ -221,7 +221,7 @@ beet_02_raw %>% summarise(individuals = sum(Cicindela.brevicollis))
   
   vec <- c("1" = 0, "2" = 200, "3" = 300, "4" = 500, "5" = 700, "6" = 900, "7" = 1100, "8" = 1300, "9" = 1500, "10" = 1700, "11" = 1900, "12" = 1700, "13" = 1500, "14" = 1300, "15" = 1100, "16" = 900, "17" = 500)
   veg_cover <- read.csv("veg_cover.csv", stringsAsFactors = TRUE) %>% mutate(across(c(site, replicate, trap, year), as.factor))
-  soil_type <- read.csv("soil_type.csv", stringsAsFactors = TRUE) %>% mutate(across(c(site, year), as.factor))
+  soil_type <- read.csv("./soil/soil_type.csv", stringsAsFactors = TRUE) %>% mutate(across(c(site, year), as.factor))
   pois_all <- left_join(pois_all, enframe(vec), by = c("site" = "name")) %>% rename(altitude = value) %>% mutate(site = as.numeric(as.character(site)))
   pois_all <- merge(pois_all, veg_cover) %>% arrange(year, site) %>% mutate(site = as.factor(site)) %>% rename("exposed_rock" = "rock")
   pois_all <- merge(pois_all,soil_type)%>% arrange(year, site) %>% mutate(site = as.factor(site))
@@ -490,8 +490,9 @@ soil_type %>% group_by(site) %>% summarise(across(c(ph,rock,clay,sand,silt), dif
 m_s_ph <- pois_all %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., individuals ~ year + vegetation*sand + litter+ bare_ground)
 summary(m_s_ph)
 
-pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,vegetation)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
-pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,bare_ground)) + geom_boxplot(aes(fill=year)) + ylab("Soil pH") + xlab("Year") + stat_n_text()
+pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,vegetation)) + geom_boxplot(aes(fill=year)) + ylab("vegetation") + xlab("Year") + stat_n_text()
+pois_all %>% filter(site %in% c(5,8,9,10)) %>% ggplot(aes(year,bare_ground)) + geom_boxplot(aes(fill=year)) + ylab("bare_ground") + xlab("Year") + stat_n_text()
+
 
 m_s_r <- soil_type %>% filter(site %in% c(5,8,9,10)) %>% lm(data = ., rock ~ year + site)
 summary(m_s_r)
