@@ -1,3 +1,5 @@
+#### Coskun Kucukkaragoz: I have edited this script provided by Abusisiwe Ndaba to suit my needs
+
 # Load necessary libraries
 library(tidyverse)
 library(vegan)
@@ -6,7 +8,10 @@ library(data.table)
 
 #####Run this before to start####
 # Read in your data
-data_all <- fread("complete NMDS data_JC.csv") %>% mutate(across(where(is.character), factor)) %>% mutate(across(where(is.integer), factor))
+
+data_all <- abund_all %>% filter(rowSums(across(where(is.numeric)))!=0)
+
+# data_all <- fread("complete NMDS data_JC.csv") %>% mutate(across(where(is.character), factor)) %>% mutate(across(where(is.integer), factor))
 str(data_all)
 summary(data_all)
 
@@ -15,7 +20,7 @@ summary(data_all)
 
 #####Graph to compare all sampling events (all data 2002, 2003, 2022 and 2023)#####
 # Select variables
-data_species<-data_all[, 6:120] # exclude Replicate, year, group and site columns
+data_species <- data_all[, 5:8] # exclude Replicate, year, group and site columns
 
 # Convert all columns to numeric (handle factors/characters properly)
 data_species <- data.frame(lapply(data_species, function(x) as.numeric(as.character(x))))
@@ -31,14 +36,14 @@ if (anyNA(data_species)) {
 data_species<-decostand(data_species,"pa") #switch to presence-absence data
 
 # Convert species abundance data to a matrix
-species_data <- as.matrix(data_species)  
+species_data <- data_species %>% as.matrix(.)
 
 # Perform NMDS analysis
 nmds <- metaMDS(species_data, distance = "bray", k = 2, trymax = 100)
 
 # Create a data frame for plotting
 nmds_df <- data.frame(NMDS1 = nmds$points[, 1], NMDS2 = nmds$points[, 2], 
-                      Sampling_event = data_all$Date)
+                      Sampling_event = data_all$year)
 
 # Plot the NMDS results - Community in 2002 & 2022
 ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Sampling_event)) +
@@ -49,12 +54,12 @@ ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Sampling_event)) +
   labs(x = "NMDS Axis 1", y = "NMDS Axis 2", color = "Sampling_event")
 #Check significance of the difference between groups
 dist <- vegdist(species_data, method = "bray")
-anosim_type<-anosim(dist,data_all$Date)
+anosim_type<-anosim(dist,data_all$year)
 summary(anosim_type)
 
 ##################Graph to compare years (all data 2002/2003 and 2022/2023)#####
 # Select variables
-data_species<-data_all[,7:120] # exclude Replicate, year, group and site columns
+data_species<-data_all[,5:8] # exclude Replicate, year, group and site columns
 
 # Convert all columns to numeric (handle factors/characters properly)
 data_species <- data.frame(lapply(data_species, function(x) as.numeric(as.character(x))))
@@ -77,7 +82,7 @@ nmds <- metaMDS(species_data, distance = "bray", k = 2, trymax = 100)
 
 # Create a data frame for plotting
 nmds_df <- data.frame(NMDS1 = nmds$points[, 1], NMDS2 = nmds$points[, 2], 
-                      Sampling_event = data_all$Date)
+                      Sampling_event = data_all$period)
 
 # Plot the NMDS results - Community in 2002 & 2022
 ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Sampling_event)) +
@@ -88,15 +93,15 @@ ggplot(nmds_df, aes(x = NMDS1, y = NMDS2, color = Sampling_event)) +
   labs(x = "NMDS Axis 1", y = "NMDS Axis 2", color = "Sampling_event")
 #Check significance of the difference between groups
 dist <- vegdist(species_data, method = "bray")
-anosim_type<-anosim(dist,data_all$Year)
+anosim_type<-anosim(dist,data_all$year)
 summary(anosim_type)
 
 ##########ALTITUDE##################--------------------------------------------
 #####Graph for all altitude one year (all sites for the selected year)#####
 ####Year 1####
-data_species<-data_all[data_all$Year=="2002-2003",6:120] #Select year number here !!
-data_factor<-data_all[data_all$Year=="2002-2003",1:5] #Select year number here !!
-title<-"Year 2002-2003" #Select year number here !!
+data_species<-data_all[data_all$period=="old",5:8] #Select year number here !!
+data_factor<-data_all[data_all$period=="old",1:4] #Select year number here !!
+title<-"Year 2002" #Select year number here !!
 
 # Convert to Presence-absence
 data_species<-decostand(data_species,"pa") #switch to presence-absence data
