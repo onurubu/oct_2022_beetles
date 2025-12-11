@@ -327,7 +327,7 @@ for (k in 1:17){
   ggsave(paste0("./MDS_plots/family_grouped/presence_absence/year/site_", k, ".png"), plot = pa, width = 4000, height = 2160, units = "px", bg = "white", create.dir = TRUE)
   ggsave(paste0("./MDS_plots/family_grouped/presence_absence/period/site_", k, ".png"), plot = pb, width = 4000, height = 2160, units = "px", bg = "white", create.dir = TRUE)
   
-  {if (k == 17){rm(x, fam_presence_values, fam_presence_cats, Herb_community.mds, MDS_xy, pa, pb)}}
+  {if (k == 17){rm(k, x, fam_presence_values, fam_presence_cats, Herb_community.mds, MDS_xy, pa, pb)}}
   
   }
 
