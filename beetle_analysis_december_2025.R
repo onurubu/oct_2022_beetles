@@ -21,38 +21,42 @@ rm(list = ls())
 
 # reading in raw data with correct data types
 
-# species analysis ####
+# species analysis december 2025 ####
 # set-up ###
+
+alt_labels <- c("0m(W)","200m(W)","300m(W)","500m(W)","700m(W)","900m(W)","1100m(W)","1300m(W)","1500m(W)","1700m(W)","1900m(W)","1700m(E)","1500m(E)","1300m(E)","1100m(E)","900m(E)","500m(E)")
 
 {
 
-  beet_wern <- read.csv("beet_wern_ID.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, label, season, year), factor)) %>% filter(ID != 578) %>% select(-label) %>% rename("cicindela_lurida" = Ropaloteres.lurida)
+  beet_wern <- read.csv("./working_beetle_data/beet_wern_ID.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, label, season, year), factor)) %>% filter(ID != 578) %>% select(-label) %>% rename("cicindela_lurida" = Ropaloteres.lurida) %>% arrange(year)
   
-  beet_22 <- read.csv("ceder_beetles_2022.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, label, season, year, full_label), factor)) %>% group_by(ID, site, replicate, trap, season, year) %>% summarise(across(where(is.numeric), sum), .groups = "drop") %>% select(1:8, morphospecies_6) %>% rename("zophosis_gracilicornis" = morphospecies_6)
+  beet_22 <- read.csv("./working_beetle_data/ceder_beetles_2022.csv", stringsAsFactors = TRUE) %>% mutate(across(c(ID, site, replicate, trap, label, season, year, full_label), factor)) %>% group_by(ID, site, replicate, trap, season, year) %>% summarise(across(where(is.numeric), sum), .groups = "drop") %>% select(1:8, morphospecies_6) %>% rename("zophosis_gracilicornis" = morphospecies_6)
   
-  abund_old <- read.csv("oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% select(-label) %>% rename("anthia_decemguttata" = Thermophilum.decemguttatum, "stenocara_dentata" = Stenocara.dentata, "zophosis_gracilicornis" = Zophosis.sp.1, "cicindela_lurida" = Cicindela.brevicollis)
+  abund_old <- read.csv("./working_beetle_data/oct_2002_beetles_coskun_edit.csv", stringsAsFactors = TRUE) %>% mutate(across(c(label,site, replicate, year), factor)) %>% select(-label) %>% rename("anthia_decemguttata" = Thermophilum.decemguttatum, "stenocara_dentata" = Stenocara.dentata, "zophosis_gracilicornis" = Zophosis.sp.1, "cicindela_lurida" = Cicindela.brevicollis) %>% mutate(season = as.factor("October")) %>% relocate(season, .before = 4)
+  
+  beet_23 <- data.table::fread("./working_beetle_data/oct_2023_beetle_abundance.csv") %>% mutate(across(c(ID, site, replicate, trap, label, season, year), factor)) %>% select(-label)
   
   # creating new dataframe with ID'd beetles as well as known species
+  beet_wide <- inner_join(beet_22, beet_wern, by = c("ID", "site", "replicate", "trap", "season", "year")) %>% arrange(year)
   
-  beet_modern <- inner_join(beet_22, beet_wern, by = c("ID", "site", "replicate", "trap", "season", "year"))
+  beet_modern <- rbind(beet_22, beet_23) %>% arrange(year, season, ID)
   
-  abund_modern <- beet_modern %>% group_by(year, site, replicate) %>% summarise(across(where(is.numeric), sum), .groups = "drop") %>% relocate(site, replicate) %>% mutate(site = factor(site, levels = c(1:17)), replicate = factor(replicate, levels = c(1:4)), year = factor(year, levels = c(2022, 2023))) %>% complete(site, replicate, year) %>% arrange(year, site, replicate) %>% replace(is.na(.), 0)
   
-  # data.table::fwrite(beet_modern, file = "./raw_identified_beetle_compiled_datasets/modern_families_raw.csv")
+  abund_modern <- beet_modern %>% group_by(year, season, site, replicate) %>% summarise(across(where(is.numeric), sum), .groups = "drop") %>% relocate(site, replicate) %>% mutate(site = factor(site, levels = c(1:17)), replicate = factor(replicate, levels = c(1:4)), year = factor(year, levels = c(2022, 2023)), season = factor(season, levels = c("March", "October"))) %>% complete(site, replicate, year, season) %>% arrange(year, season, site, replicate) %>% replace(is.na(.), 0) %>% filter(paste(year, season) != "2022 March")
   
-  # data.table::fwrite(abund_modern, file = "./raw_identified_beetle_compiled_datasets/modern_families_grouped.csv")
+  # df1 <- abund_modern %>% select(1:3, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis, cicindela_lurida)
+  # 
+  # df2 <- abund_old %>% select(1:3, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis, cicindela_lurida)
   
-  # data.table::fwrite(abund_old, file = "./raw_identified_beetle_compiled_datasets/old_families_grouped.csv")
+  df1 <- abund_modern %>% select(1:4, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
   
-  df1 <- abund_modern %>% select(1:3, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis, cicindela_lurida)
+  df2 <- abund_old %>% select(1:4, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
   
-  df2 <- abund_old %>% select(1:3, anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis, cicindela_lurida)
-  
-  abund_all <- rbind(df2, df1) %>%  mutate(period = factor(case_when(year %in% c(2002, 2003) ~ "old", year %in% c(2022, 2023) ~ "modern"))) %>% relocate(site, replicate, year, period)
+  abund_all <- rbind(df2, df1) %>%  mutate(period = factor(case_when(year %in% c(2002, 2003) ~ "old", year %in% c(2022, 2023) ~ "modern"))) %>% relocate(site, replicate, year, season, period)
   
   # data.table::fwrite(abund_all, file = "./raw_identified_beetle_compiled_datasets/all_families_grouped.csv")
   
-  rm(abund_modern, abund_old, beet_22, beet_modern, beet_wern, df1, df2)
+  rm(abund_modern, abund_old, beet_wern, df1, df2, beet_22, beet_23)
 
 }
 
@@ -195,7 +199,7 @@ for (k in 1:17){
   
 }
 
-# family analysis ####
+# family analysis december 2025 ####
 # set-up ###
 
 {
@@ -468,3 +472,42 @@ for (k in 1:17){
   {if (k == 17){rm(k, x, fam_sumse_values, fam_sums_cats, Herb_community.mds, MDS_xy, pa, pb)}}
   
 }
+
+
+# January 2026 analyses #####
+
+# all species ####
+
+modern_species_richness <- beet_wide %>% group_by(year, season, site, replicate) %>% summarise(across(where(is.numeric), sum), .groups = "drop") %>% mutate(site = factor(site, levels = c(1:17)), replicate = factor(replicate, levels = c(1:4)), year = factor(year, levels = c(2022, 2023)), season = factor(season, levels = c("March", "October"))) %>% complete(site, replicate, year, season) %>% replace(is.na(.), 0) %>% filter(paste(year, season) != "2022 March", paste(year, season) != "2023 October") %>% relocate(site, replicate) %>% arrange(year)
+
+modern_species_richness <- modern_species_richness %>% mutate(richness = specnumber(modern_species_richness[, -(1:4)])) %>% select(1:4, richness)
+
+modern_species_abund <- beet_wide %>% mutate(abundance = rowSums(across(where(is.numeric)))) %>% group_by(year, season, site, replicate) %>% summarise(abundance = mean(abundance), .groups = "drop") %>% mutate(site = factor(site, levels = c(1:17)), replicate = factor(replicate, levels = c(1:4)), year = factor(year, levels = c(2022, 2023)), season = factor(season, levels = c("March", "October"))) %>% complete(site, replicate, year, season) %>% replace(is.na(.), 0) %>% filter(paste(year, season) != "2022 March", paste(year, season) != "2023 October") %>% relocate(site, replicate) %>% arrange(year)
+
+modern_species_div <- modern_species_richness %>% mutate(abundance = modern_species_abund$abundance)
+
+
+# %>% mutate(abundance = rowSums(across(where(is.numeric))), richness = specnumber(beet_wide[, -(1:6)])) %>% select(2:6,  abundance, richness) %>% group_by(year, season, site, replicate) # %>% filter(rowSums(across(where(is.numeric)))!=0)
+
+
+#%>% group_by(year, season, site, replicate) %>% summarise(across(where(is.numeric), mean), .groups = "drop")
+
+modern_species_div <- modern_species_all %>% mutate(abundance = mean(across(where(is.numeric))), richness = specnumber(modern_species_all[, -(1:4)])) %>% select(1:4,  abundance, richness) %>% group_by(year, season, site, replicate)
+
+#mutate(abundance = rowSums(across(where(is.numeric))), richness = specnumber(modern_species_all[, -(1:4)])) %>% select(1:4,  abundance, richness) %>% group_by(year, season, site, replicate)
+
+# %>% filter(rowSums(across(where(is.numeric)))!=0)
+
+
+# combined years ###
+# richness ##
+
+modern_species_div %>% ggplot(aes(x = site, y = richness)) + geom_boxplot() + theme_minimal(base_size = 10) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(x = "Altitude and Aspect", y = "Species richness") + ggtitle("Species richness per site") + theme(plot.title = element_text(hjust = 0.5)) + scale_x_discrete(labels = alt_labels) + scale_y_continuous(limits = c(0, max(modern_species_div$richness)))
+
+
+p1 <- dat %>% ggplot(aes(date, group = date)) + theme_minimal(base_size = 10) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + geom_boxplot(aes(y = m_tground), key_glyph = "point") + labs(x = "Year", y = "Mean daily temperature (°C)") + ggtitle("Mean daily temperature in October over sampling years") + theme(plot.title = element_text(hjust = 0.5))
+
+
+
+
+
