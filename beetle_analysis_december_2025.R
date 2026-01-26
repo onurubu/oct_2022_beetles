@@ -489,8 +489,11 @@ for (k in 1:17){
   
   modern_species_div <- modern_species_richness %>% mutate(abundance = modern_species_abund$abundance) %>% mutate(veg_type = factor(case_when(site %in% c(1) ~ "strandveld", site %in% c(2, 6, 16) ~ "restioid", site %in% c(3, 4, 5) ~ "proteoid", site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous", site %in% c(11) ~ "alpine", site %in% c(17) ~ "succulent_karoo"))) %>% relocate(site, replicate, year, veg_type)
   
-  
+}
+
   # combined years ##
+
+{
   
   p1 <- modern_species_div %>% ggplot(aes(x = site, y = richness)) + geom_boxplot() + theme_minimal(base_size = 10) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(x = "Altitude and Aspect", y = "Species richness") + ggtitle("Species richness per site (October 2022 and March 2023)") + theme(plot.title = element_text(hjust = 0.5)) + scale_x_discrete(labels = alt_labels) + scale_y_continuous(limits = c(0, max(modern_species_div$richness)))
   
@@ -531,7 +534,7 @@ for (k in 1:17){
   ggsave(paste0("./beetle_boxplots/seasonal_comparison/all_species/veg_type/combined_years_abundance.png"), plot = p6, width = 3840, height = 2160, units = "px", bg = "white", create.dir = TRUE)
   ggsave(paste0("./beetle_boxplots/seasonal_comparison/all_species/veg_type/seasonal_richness.png"), plot = p7, width = 3840, height = 2160, units = "px", bg = "white", create.dir = TRUE)
   ggsave(paste0("./beetle_boxplots/seasonal_comparison/all_species/veg_type/seasonal_abundance.png"), plot = p8, width = 3840, height = 2160, units = "px", bg = "white", create.dir = TRUE)
-  rm(modern_species_abund, modern_species_div, modern_species_richness, p1, p2, p3, p4, p5, p6, p7, p8)
+  rm(modern_species_abund, modern_species_richness, p1, p2, p3, p4, p5, p6, p7, p8)
   
 }
 
@@ -1338,21 +1341,6 @@ for (k in 1:17){
   
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # boxplots of all years ####
 
 # anthia ###
@@ -1456,19 +1444,6 @@ for (k in 1:17){
   rm(p1, p2, p3, p4, abund_box_data)
   
 }
-
-
-# # Heatmap ####
-# 
-# dat <- abund_all %>% mutate(veg_type = factor(case_when(site %in% c(1) ~ "strandveld", site %in% c(2, 6, 16) ~ "restioid", site %in% c(3, 4, 5) ~ "proteoid", site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous", site %in% c(11) ~ "alpine", site %in% c(17) ~ "succulent_karoo"))) %>% relocate(site, replicate, year, veg_type) %>% group_by(period, year, season, site, replicate, veg_type) %>% summarise(across(where(is.numeric), sum), .groups = "drop") %>% filter(paste(year, season) != "2023 March") %>% group_by(period, site) %>% summarise(across(where(is.numeric), sum), .groups = "drop") %>% mutate(veg_type = factor(case_when(site %in% c(1) ~ "strandveld", site %in% c(2, 6, 16) ~ "restioid", site %in% c(3, 4, 5) ~ "proteoid", site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous", site %in% c(11) ~ "alpine", site %in% c(17) ~ "succulent_karoo"))) %>% relocate(period, site, veg_type)
-
-
-
-
-
-
-
-
 
 
 

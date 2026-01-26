@@ -1,0 +1,4 @@
+"species","shift_max_E","shift_max_W","shift_min_E","shift_min_W","max_E_dir","max_W_dir","min_E_dir","min_W_dir"
+"anthia_decemguttata",0,400,-200,100,"No change","Upslope","Downslope","Upslope"
+"stenocara_dentata",0,0,0,-1100,"No change","No change","No change","Downslope"
+"zophosis_gracilicornis",0,0,0,0,"No change","No change","No change","No change"
