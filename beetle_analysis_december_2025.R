@@ -15,12 +15,10 @@ rm(list = ls())
   library(sf)
   library(hms)
   library(vegan)
+  library(MCMCglmm)
 }
 
 # reading in raw data with correct data types
-
-# species analysis december 2025 ####
-# set-up ###
 
 alt_labels <- c(
   "0m(W)",
@@ -142,6 +140,11 @@ alt_labels <- c(
   rm(abund_modern, abund_old, beet_wern, df1, df2, beet_22, beet_23)
 }
 
+# abund_all <- abund_all %>% filter(paste(year, season) != "2023 March")
+
+Sys.sleep(0.1)
+
+# species analysis december 2025 ####
 # mds ###
 
 # presence-absence ##
@@ -4872,17 +4875,18 @@ for (k in 1:17) {
     scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata)))
 
   p2 <- abund_box_data %>%
-    ggplot(aes(x = year, y = anthia_decemguttata, fill = site)) +
+    ggplot(aes(x = site, y = anthia_decemguttata, fill = year)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("Anthia decemguttata mean abundance per year") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata)))
+    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata))) +
+    scale_fill_discrete(name = "Year")
 
   p3 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
@@ -4900,17 +4904,21 @@ for (k in 1:17) {
 
   p4 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
-    ggplot(aes(x = period, y = anthia_decemguttata, fill = site)) +
+    ggplot(aes(x = site, y = anthia_decemguttata, fill = period)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("Anthia decemguttata mean abundance per samplling period") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata)))
+    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata))) +
+    scale_fill_discrete(
+      name = "Sampling period",
+      labels = c("old" = "2002/2003", "modern" = "2022/2023")
+    )
 }
 
 {
@@ -4979,17 +4987,18 @@ for (k in 1:17) {
     scale_y_continuous(limits = c(0, max(abund_box_data$stenocara_dentata)))
 
   p2 <- abund_box_data %>%
-    ggplot(aes(x = year, y = stenocara_dentata, fill = site)) +
+    ggplot(aes(x = site, y = stenocara_dentata, fill = year)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("Stenocara dentata mean abundance per year") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$stenocara_dentata)))
+    scale_y_continuous(limits = c(0, max(abund_box_data$stenocara_dentata))) +
+    scale_fill_discrete(name = "Year")
 
   p3 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
@@ -5007,17 +5016,21 @@ for (k in 1:17) {
 
   p4 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
-    ggplot(aes(x = period, y = stenocara_dentata, fill = site)) +
+    ggplot(aes(x = site, y = stenocara_dentata, fill = period)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("Stenocara dentata mean abundance per samplling period") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$stenocara_dentata)))
+    scale_y_continuous(limits = c(0, max(abund_box_data$stenocara_dentata))) +
+    scale_fill_discrete(
+      name = "Sampling period",
+      labels = c("old" = "2002/2003", "modern" = "2022/2023")
+    )
 }
 
 {
@@ -5092,19 +5105,20 @@ for (k in 1:17) {
     )
 
   p2 <- abund_box_data %>%
-    ggplot(aes(x = year, y = zophosis_gracilicornis, fill = site)) +
+    ggplot(aes(x = site, y = zophosis_gracilicornis, fill = year)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("Zophosis gracilicornis mean abundance per year") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_y_continuous(
       limits = c(0, max(abund_box_data$zophosis_gracilicornis))
-    )
+    ) +
+    scale_fill_discrete(name = "Year")
 
   p3 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
@@ -5124,18 +5138,22 @@ for (k in 1:17) {
 
   p4 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
-    ggplot(aes(x = period, y = zophosis_gracilicornis, fill = site)) +
+    ggplot(aes(x = site, y = zophosis_gracilicornis, fill = period)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("Zophosis gracilicornis mean abundance per samplling period") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_y_continuous(
       limits = c(0, max(abund_box_data$zophosis_gracilicornis))
+    ) +
+    scale_fill_discrete(
+      name = "Sampling period",
+      labels = c("old" = "2002/2003", "modern" = "2022/2023")
     )
 }
 
@@ -5214,17 +5232,18 @@ for (k in 1:17) {
     scale_y_continuous(limits = c(0, max(abund_box_data$abundance)))
 
   p2 <- abund_box_data %>%
-    ggplot(aes(x = year, y = abundance, fill = site)) +
+    ggplot(aes(x = site, y = abundance, fill = year)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("All species mean abundance per year") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$abundance)))
+    scale_y_continuous(limits = c(0, max(abund_box_data$abundance))) +
+    scale_fill_discrete(name = "Year")
 
   p3 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
@@ -5242,17 +5261,21 @@ for (k in 1:17) {
 
   p4 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
-    ggplot(aes(x = period, y = abundance, fill = site)) +
+    ggplot(aes(x = site, y = abundance, fill = period)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
+    labs(x = "Site", y = "Mean Abundance") +
     ggtitle("All species mean abundance per samplling period") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$abundance)))
+    scale_y_continuous(limits = c(0, max(abund_box_data$abundance))) +
+    scale_fill_discrete(
+      name = "Sampling period",
+      labels = c("old" = "2002/2003", "modern" = "2022/2023")
+    )
 }
 
 {
@@ -5303,3 +5326,43 @@ for (k in 1:17) {
 
   rm(p1, p2, p3, p4, abund_box_data)
 }
+
+# mixed models for difference significance in historical comparisons ####
+
+# whole transect ##
+model_anthia <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = anthia_decemguttata ~ year,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_anthia)
+
+model_stenocara <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = stenocara_dentata ~ year,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_stenocara)
+
+model_zophosis <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = zophosis_gracilicornis ~ year,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_zophosis)
+
+# site-by-site
+
+model_zophosis_sites <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = zophosis_gracilicornis ~ (year * site),
+    random = ~site
+  )
+summary(model_zophosis_sites)
