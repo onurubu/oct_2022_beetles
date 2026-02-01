@@ -34,7 +34,23 @@ Methods
 	Synthesis:
 		How were the environmental variables and the beetle data utilised together to analyse the state of the beetle assemblage, and perform comparisons.
 Results
+	Beetle changes
+		Modern Seasonal analysis
+		Historical analyses:
+			Changes in beetles over separate years and sampling period, vegetation type.
+				Whole transect and site-by site (maybe)
+	Comparison of vegetation cover and height over time
+	Comparison of soil attributes
+	Seasonal decomposition
+	
+	
 	
 Discussion
+	DONE IN DOCUMENT
+	
+
+TODOS:
+	Add the range shifts for the historical data as well, completely forgot.
+	Model the precipitation STRs and add those
 	
 	

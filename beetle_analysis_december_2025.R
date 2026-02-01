@@ -140,7 +140,7 @@ alt_labels <- c(
   rm(abund_modern, abund_old, beet_wern, df1, df2, beet_22, beet_23)
 }
 
-# abund_all <- abund_all %>% filter(paste(year, season) != "2023 March")
+abund_all <- abund_all %>% filter(paste(year, season) != "2023 March")
 
 Sys.sleep(0.1)
 
@@ -2653,31 +2653,39 @@ for (k in 1:17) {
 
   p3 <- modern_species_div %>%
     ggplot(aes(x = site, y = richness, fill = year)) +
-    theme_minimal(base_size = 10) +
+    theme_minimal(base_size = 12) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
     labs(x = "Altitude and Aspect", y = "Species richness") +
-    ggtitle("Species richness per site (October 2022 and March 2023)") +
+    ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_x_discrete(labels = alt_labels) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
-    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge")
+    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    scale_fill_discrete(
+      name = "Season",
+      labels = c("2022" = "October 2022", "2023" = "March 2023")
+    )
 
   p4 <- modern_species_div %>%
     ggplot(aes(x = site, y = abundance, fill = year)) +
-    theme_minimal(base_size = 10) +
+    theme_minimal(base_size = 12) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
     labs(x = "Altitude and Aspect", y = "Mean Abundance") +
-    ggtitle("Mean abundance per site (October 2022 and March 2023)") +
+    ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_x_discrete(labels = alt_labels) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
-    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge")
+    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    scale_fill_discrete(
+      name = "Season",
+      labels = c("2022" = "October 2022", "2023" = "March 2023")
+    )
 
   # veg types combined year ##
 
@@ -2715,35 +2723,45 @@ for (k in 1:17) {
 
   p7 <- modern_species_div %>%
     ggplot(aes(x = veg_type, y = richness, fill = year)) +
-    theme_minimal(base_size = 10) +
+    theme_minimal(base_size = 12) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
     labs(x = "Vegetation Type", y = "Species richness") +
     ggtitle(
-      "Species richness per vegetation type (October 2022 and March 2023)"
+      ""
     ) +
     theme(plot.title = element_text(hjust = 0.5)) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
-    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge")
+    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    scale_fill_discrete(
+      name = "Season",
+      labels = c("2022" = "October 2022", "2023" = "March 2023")
+    )
 
   p8 <- modern_species_div %>%
     ggplot(aes(x = veg_type, y = abundance, fill = year)) +
-    theme_minimal(base_size = 10) +
+    theme_minimal(base_size = 12) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
     labs(x = "Vegetation Type", y = "Mean Abundance") +
     ggtitle(
-      "Mean abundance per vegetation type (October 2022 and March 2023)"
+      ""
     ) +
     theme(plot.title = element_text(hjust = 0.5)) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
-    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge")
+    stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    scale_fill_discrete(
+      name = "Season",
+      labels = c("2022" = "October 2022", "2023" = "March 2023")
+    )
 }
 
+gridExtra::grid.arrange(p3, p4)
+gridExtra::grid.arrange(p7, p8)
 
 {
   ggsave(
@@ -3901,6 +3919,7 @@ for (k in 1:17) {
     theme_bw() +
     geom_point(alpha = 0) +
     ggtitle("Mean species abundance by site") +
+    stat_ellipse() +
     scale_color_discrete(
       name = "Site",
       guide = guide_legend(override.aes = list(alpha = 1))
@@ -5330,6 +5349,35 @@ for (k in 1:17) {
 # mixed models for difference significance in historical comparisons ####
 
 # whole transect ##
+
+abund_all <- abund_all %>%
+  mutate(
+    veg_type = factor(case_when(
+      site %in% c(1) ~ "strandveld",
+      site %in% c(2, 6, 16) ~ "restioid",
+      site %in% c(3, 4, 5) ~ "proteoid",
+      site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+      site %in% c(11) ~ "alpine",
+      site %in% c(17) ~ "succulent_karoo"
+    ))
+  ) %>%
+  mutate(
+    site_rep = as.factor(paste(site, replicate)),
+    abundance = as.integer(rowSums(across(
+      .cols = c(anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
+    )))
+  )
+abund_all$period <- relevel(abund_all$period, ref = 2)
+
+model_all <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = abundance ~ year,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_all)
+
 model_anthia <- abund_all %>%
   MCMCglmm(
     data = .,
@@ -5357,12 +5405,99 @@ model_zophosis <- abund_all %>%
   )
 summary(model_zophosis)
 
-# site-by-site
+model_all_period <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = abundance ~ period,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_all_period)
+
+model_anthia_period <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = anthia_decemguttata ~ period,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_anthia_period)
+
+model_stenocara_period <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = stenocara_dentata ~ period,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_stenocara_period)
+
+model_zophosis_period <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = zophosis_gracilicornis ~ period,
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_zophosis_period)
+
+# veg type ##
+
+model_veg <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = anthia_decemguttata ~ (year * veg_type),
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_veg)
+
+# site-by-site ##
+
+model_anthia_sites <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = anthia_decemguttata ~ (period * veg_type),
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_anthia_sites)
+
+model_stenocara_sites <- abund_all %>%
+  MCMCglmm(
+    data = .,
+    fixed = stenocara_dentata ~ (period * veg_type),
+    random = ~site,
+    family = "poisson"
+  )
+summary(model_stenocara_sites)
 
 model_zophosis_sites <- abund_all %>%
   MCMCglmm(
     data = .,
-    fixed = zophosis_gracilicornis ~ (year * site),
-    random = ~site
+    fixed = zophosis_gracilicornis ~ (period * veg_type),
+    random = ~site,
+    family = "poisson"
   )
 summary(model_zophosis_sites)
+
+abund_all %>% group_by(year) %>% summarise(sum(anthia_decemguttata))
+abund_all %>% group_by(year) %>% summarise(sum(stenocara_dentata))
+abund_all %>% group_by(year) %>% summarise(sum(zophosis_gracilicornis))
+
+# results writing ####
+
+beet_wide_results <- beet_wide %>%
+  group_by(year) %>%
+  summarise_if(is.numeric, sum, na.rm = TRUE)
+
+x <- beet_wide %>%
+  filter(site == 11) %>%
+  group_by(year) %>%
+  summarise_if(is.numeric, sum, na.rm = TRUE)
+
+beet_moder_summer_exclusive <- beet_wide_results %>% pivot_longer(cols = 2:43)
+beet_wide_results %>%
+  group_by(year) %>%
+  mutate(abund = rowSums(across(where(is.numeric)))) %>%
+  select(year, abund)
