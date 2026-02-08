@@ -2603,7 +2603,7 @@ for (k in 1:17) {
     arrange(year) %>%
     mutate(abundance = rowSums(across(where(is.numeric)))) %>%
     group_by(year, season, site, replicate) %>%
-    summarise(abundance = mean(abundance), .groups = "drop")
+    summarise(abundance = sum(abundance), .groups = "drop")
 
   modern_species_div <- modern_species_richness %>%
     mutate(abundance = modern_species_abund$abundance) %>%
@@ -5485,7 +5485,7 @@ abund_all %>% group_by(year) %>% summarise(sum(anthia_decemguttata))
 abund_all %>% group_by(year) %>% summarise(sum(stenocara_dentata))
 abund_all %>% group_by(year) %>% summarise(sum(zophosis_gracilicornis))
 
-# results writing ####
+# writing misc ####
 
 beet_wide_results <- beet_wide %>%
   group_by(year) %>%
@@ -5496,7 +5496,7 @@ x <- beet_wide %>%
   group_by(year) %>%
   summarise_if(is.numeric, sum, na.rm = TRUE)
 
-beet_moder_summer_exclusive <- beet_wide_results %>% pivot_longer(cols = 2:43)
+beet_modern_summer_exclusive <- beet_wide_results %>% pivot_longer(cols = 2:43)
 beet_wide_results %>%
   group_by(year) %>%
   mutate(abund = rowSums(across(where(is.numeric)))) %>%
