@@ -512,3 +512,245 @@ model_maxhgt_period_sites <- veg_height_comp %>%
     random = ~replicate,
   )
 summary(model_maxhgt_period_sites)
+
+# synthesis ####
+{
+  veg_cover <- data.table::fread("./veg_cover_data/veg_cover_all.csv") %>%
+    mutate(across(
+      c(site, replicate, trap, year, season),
+      factor
+    ))
+
+  veg_cover_comp <- veg_cover %>%
+    filter(
+      paste(year, season) != "2023 March",
+      paste(year, season) != "2003 March"
+    ) %>%
+    group_by(year, season, site, replicate) %>%
+    summarise(across(where(is.numeric), mean), .groups = "drop") %>%
+    mutate(period = abund_all$period) %>%
+    relocate(site, replicate, year, season, period)
+
+  veg_cover_season <- veg_cover %>%
+    filter(
+      paste(year, season) != "2002 October",
+      paste(year, season) != "2023 October",
+      paste(year, season) != "2003 October",
+      paste(year, season) != "2003 March"
+    )
+
+  veg_cover_comp_long <- veg_cover_comp %>%
+    pivot_longer(cols = c(bare_ground, litter, rock, veg)) %>%
+    mutate(
+      period = factor(case_when(
+        year %in% c(2002, 2003) ~ "old",
+        year %in% c(2022, 2023) ~ "modern"
+      ))
+    ) %>%
+    mutate(period = factor(period, levels = c("old", "modern"))) %>%
+    relocate(year, season, site, replicate, period)
+
+  {
+    soil_dat_02 <- data.table::fread("./soil/soil_data_2002_working.csv") %>%
+      mutate(across(c(site, replicate, year), factor)) %>%
+      rename("rock_soil" = "rock")
+    soil_dat_22 <- data.table::fread("./soil/soil_data_2022_working.csv") %>%
+      mutate(across(c(site, replicate, year), factor)) %>%
+      rename("rock_soil" = "rock")
+
+    soil_dat_02 <- rbind(soil_dat_02, soil_dat_02)
+    soil_dat_22 <- rbind(soil_dat_22, soil_dat_22)
+
+    soil_dat_02 <- soil_dat_02 %>%
+      mutate(
+        year = as.factor(rep(c(2002, 2003), each = (nrow(soil_dat_02) / 2))),
+        season = as.factor(rep("October", nrow(.))),
+        period = as.factor(rep("old", nrow(.)))
+      ) %>%
+      relocate(site, replicate, year, season, period)
+
+    soil_dat_22 <- soil_dat_22 %>%
+      mutate(
+        year = as.factor(rep(c(2022, 2023), each = (nrow(soil_dat_22) / 2))),
+        season = as.factor(rep("October", nrow(.))),
+        period = as.factor(rep("modern", nrow(.)))
+      ) %>%
+      relocate(site, replicate, year, season, period)
+
+    soil_dat <- rbind(soil_dat_02, soil_dat_22)
+    rm(soil_dat_02, soil_dat_22)
+  }
+
+  veg_height <- data.table::fread(
+    "./veg_height_data/veg_height_tothits.csv"
+  ) %>%
+    mutate(across(
+      c(site, replicate, year, season),
+      factor
+    ))
+
+  veg_height_comp <- veg_height %>%
+    filter(
+      paste(year, season) != "2023 March",
+      paste(year, season) != "2003 March"
+    ) %>%
+    group_by(year, season, site, replicate) %>%
+    summarise(across(where(is.numeric), mean), .groups = "drop") %>%
+    mutate(period = abund_all$period) %>%
+    relocate(site, replicate, year, season, period) %>%
+    mutate(period = factor(period, levels = c("old", "modern")))
+
+  veg_height_season <- veg_height %>%
+    filter(
+      paste(year, season) != "2002 October",
+      paste(year, season) != "2023 October",
+      paste(year, season) != "2003 October",
+      paste(year, season) != "2003 March"
+    )
+
+  site_data <- data.table::fread("./site_data/site_attributes.csv") %>%
+    select(site, replicate, elevation, slope) %>%
+    mutate(site = as.factor(site), replicate = as.factor(replicate))
+  fire_data <- readRDS("./fire_data/fire_history.rds") %>% select(-fire_years)
+  clim_data <- readRDS("./climate_data/clim_data.rds")
+  clim_data_comp <- clim_data %>%
+    filter(paste(year, month) != "2023 3") %>%
+    select(-month)
+  altitudes <- c(
+    0,
+    200,
+    300,
+    500,
+    700,
+    900,
+    1100,
+    1300,
+    1500,
+    1700,
+    1900,
+    1700,
+    1500,
+    1300,
+    1100,
+    900,
+    500
+  )
+
+  {
+    dat <- full_join(veg_cover_comp, soil_dat)
+    dat <- full_join(dat, veg_height_comp)
+    dat <- full_join(dat, fire_data)
+    dat <- full_join(dat, clim_data_comp)
+    env_all <- left_join(dat, site_data) %>%
+      mutate(
+        veg_type = factor(case_when(
+          site %in% c(1) ~ "strandveld",
+          site %in% c(2, 6, 16) ~ "restioid",
+          site %in% c(3, 4, 5) ~ "proteoid",
+          site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+          site %in% c(11) ~ "alpine",
+          site %in% c(17) ~ "succulent_karoo"
+        )),
+        slope = (case_when(
+          site %in% c(1:11) ~ 1,
+          site %in% c(12:17) ~ 2,
+        ))
+      ) %>%
+      relocate(veg_type, .after = period)
+    # mutate(
+    #   abundance = rowSums(across(c(
+    #     anthia_decemguttata,
+    #     stenocara_dentata,
+    #     zophosis_gracilicornis
+    #   )))
+    # )
+    rm(dat)
+  }
+}
+
+# seasonal ###
+
+seasonal_data <- beet_wide %>%
+  select(-ID) %>%
+  group_by(year, season, site, replicate) %>%
+  summarise(across(where(is.numeric), sum), .groups = "drop") %>%
+  mutate(
+    site = factor(site, levels = c(1:17)),
+    replicate = factor(replicate, levels = c(1:4)),
+    year = factor(year, levels = c(2022, 2023)),
+    season = factor(season, levels = c("March", "October"))
+  ) %>%
+  complete(site, replicate, year, season) %>%
+  replace(is.na(.), 0) %>%
+  filter(
+    paste(year, season) != "2022 March",
+    paste(year, season) != "2023 October"
+  ) %>%
+  arrange(year) %>%
+  mutate(
+    veg_type = factor(case_when(
+      site %in% c(1) ~ "strandveld",
+      site %in% c(2, 6, 16) ~ "restioid",
+      site %in% c(3, 4, 5) ~ "proteoid",
+      site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+      site %in% c(11) ~ "alpine",
+      site %in% c(17) ~ "succulent_karoo"
+    ))
+  ) %>%
+  relocate(site, replicate, year, veg_type)
+
+{
+  xcover <- veg_cover_season %>%
+    group_by(year, site, replicate) %>%
+    summarise(across(where(is.numeric), mean), .groups = "drop")
+
+  xfire <- fire_data %>% filter(year %in% c(2022, 2023))
+
+  clim_data_season <- clim_data %>%
+    filter(year != 2002, year != 2003, paste(year, month) != "2023 10") %>%
+    select(-month)
+
+  dat <- full_join(xcover, veg_height_season)
+  dat <- full_join(dat, xfire)
+  dat <- full_join(dat, clim_data_season)
+  env_season <- left_join(dat, site_data) %>%
+    mutate(
+      veg_type = factor(case_when(
+        site %in% c(1) ~ "strandveld",
+        site %in% c(2, 6, 16) ~ "restioid",
+        site %in% c(3, 4, 5) ~ "proteoid",
+        site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+        site %in% c(11) ~ "alpine",
+        site %in% c(17) ~ "succulent_karoo"
+      )),
+      slope = (case_when(
+        site %in% c(1:11) ~ 1,
+        site %in% c(12:17) ~ 2,
+      ))
+    ) %>%
+    relocate(veg_type, .after = replicate)
+  # mutate(
+  #   abundance = rowSums(across(c(
+  #     anthia_decemguttata,
+  #     stenocara_dentata,
+  #     zophosis_gracilicornis
+  #   )))
+  # )
+  rm(
+    dat,
+    xcover,
+    xfire,
+    clim_data_season,
+    clim_data_comp,
+    clim_data,
+    fire_data,
+    soil_dat,
+    veg_cover,
+    veg_cover_comp_long,
+    veg_cover_season,
+    veg_height,
+    veg_cover_comp,
+    veg_height_season,
+    veg_height_comp
+  )
+}

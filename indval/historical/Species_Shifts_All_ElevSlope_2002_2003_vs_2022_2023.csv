@@ -1,0 +1,4 @@
+"Species","ElevSlope_2002","ElevSlope_2022","Status"
+"anthia_decemguttata","1100_E, 1100_W, 1300_W, 1500_E, 1500_W, 1700_E, 200_W, 300_W, 500_W, 700_W, 900_W","1100_E, 1100_W, 1300_W, 1500_E, 1500_W, 1700_E, 1700_W, 1900_W, 300_W, 500_W, 700_W, 900_E, 900_W","Shifted elevation"
+"stenocara_dentata","1100_W, 1300_W, 1500_E, 1500_W, 1700_E, 1700_W, 500_E","0_W, 1100_W, 1300_W, 1500_E, 1500_W, 1700_E, 1700_W, 300_W, 500_E","Shifted elevation"
+"zophosis_gracilicornis","0_W, 1100_E, 1100_W, 1300_W, 1500_E, 1500_W, 1700_E, 1700_W, 200_W, 300_W, 500_E, 500_W, 700_W, 900_E, 900_W","0_W, 1100_E, 1100_W, 1300_W, 1500_E, 1500_W, 1700_E, 1700_W, 200_W, 300_W, 500_E, 500_W, 700_W, 900_E, 900_W","Stable across elevations"
