@@ -38,7 +38,17 @@ veg_cover_comp_long <- veg_cover_comp %>%
     ))
   ) %>%
   mutate(period = factor(period, levels = c("old", "modern"))) %>%
-  relocate(year, season, site, replicate, period)
+  relocate(year, season, site, replicate, period) %>%
+  mutate(
+    veg_type = factor(case_when(
+      site %in% c(1) ~ "strandveld",
+      site %in% c(2, 6, 16) ~ "restioid",
+      site %in% c(3, 4, 5) ~ "proteoid",
+      site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+      site %in% c(11) ~ "alpine",
+      site %in% c(17) ~ "succulent_karoo"
+    ))
+  )
 
 # year plots ###
 
@@ -106,9 +116,9 @@ veg_cover_comp_long <- veg_cover_comp %>%
   for (k in 1:17) {
     p <- veg_cover_comp_long %>%
       filter(site == k) %>%
-      ggplot(aes(x = period, y = (value / 4), fill = name)) +
+      ggplot(aes(x = period, y = (value / 8), fill = name)) +
       geom_bar(position = "stack", stat = "identity") +
-      theme_minimal(base_size = 12) +
+      theme_minimal(base_size = 15) +
       theme(
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
@@ -134,9 +144,9 @@ veg_cover_comp_long <- veg_cover_comp %>%
   }
 
   p <- veg_cover_comp_long %>%
-    ggplot(aes(x = period, y = (value / 68), fill = name)) +
+    ggplot(aes(x = period, y = (value / 136), fill = name)) +
     geom_bar(position = "stack", stat = "identity") +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 15) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
@@ -170,7 +180,7 @@ model_veg_years <- veg_cover_comp_long %>%
   )
 summary(model_veg_years)
 
-model_veg_period <- veg_cover_comp_long %>%
+model_veg_period <- data.frame(veg_cover_comp_long) %>%
   MCMCglmm(
     data = .,
     fixed = value ~ (period * name),
@@ -178,10 +188,30 @@ model_veg_period <- veg_cover_comp_long %>%
   )
 summary(model_veg_period)
 
+model_veg_period_type <- veg_cover_comp_long %>%
+  MCMCglmm(
+    data = .,
+    fixed = value ~ (period * name * veg_type),
+    random = ~site,
+  )
+summary(model_veg_period_type)
+
+x <- veg_cover_comp %>%
+  group_by(period) %>%
+  summarise(across(where(is.numeric), mean))
+y <- x %>%
+  group_by(period) %>%
+  summarise(across(where(is.numeric), mean)) %>%
+  summarise(
+    bare_ground = (bare_ground[1] - bare_ground[2]) / bare_ground[2] * 100,
+    litter = (litter[1] - litter[2]) / litter[2] * 100,
+    rock = (rock[1] - rock[2]) / rock[2] * 100,
+    veg = (veg[1] - veg[2]) / veg[2] * 100
+  )
 
 Sys.sleep(0.1)
-
-
+x
+y
 # soil ####
 
 {
@@ -252,7 +282,7 @@ veg_height_season <- veg_height %>%
       filter(site == k) %>%
       ggplot(aes(x = year, y = tothits)) +
       geom_boxplot() +
-      theme_minimal(base_size = 12) +
+      theme_minimal(base_size = 15) +
       theme(
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
@@ -274,7 +304,7 @@ veg_height_season <- veg_height %>%
   p <- veg_height_comp %>%
     ggplot(aes(x = year, y = tothits)) +
     geom_boxplot() +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 15) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
@@ -302,7 +332,7 @@ veg_height_season <- veg_height %>%
       filter(site == k) %>%
       ggplot(aes(x = period, y = tothits)) +
       geom_boxplot() +
-      theme_minimal(base_size = 12) +
+      theme_minimal(base_size = 15) +
       theme(
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
@@ -325,7 +355,7 @@ veg_height_season <- veg_height %>%
   p <- veg_height_comp %>%
     ggplot(aes(x = period, y = tothits)) +
     geom_boxplot() +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 15) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
@@ -353,14 +383,14 @@ veg_height_season <- veg_height %>%
   for (k in 1:17) {
     p <- veg_height_comp %>%
       filter(site == k) %>%
-      ggplot(aes(x = year, y = maxhgt)) +
+      ggplot(aes(x = year, y = ((maxhgt - 1) * 25))) +
       geom_boxplot() +
-      theme_minimal(base_size = 12) +
+      theme_minimal(base_size = 15) +
       theme(
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      labs(x = "Year", y = "Maximum vegetation height") +
+      labs(x = "Year", y = "Maximum vegetation height (cm)") +
       theme(plot.title = element_text(hjust = 0.5)) +
       ggtitle(alt_labels[k])
     ggsave(
@@ -375,14 +405,14 @@ veg_height_season <- veg_height %>%
   }
 
   p <- veg_height_comp %>%
-    ggplot(aes(x = year, y = maxhgt)) +
+    ggplot(aes(x = year, y = ((maxhgt - 1) * 25))) +
     geom_boxplot() +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 15) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Year", y = "Maximum vegetation height") +
+    labs(x = "Year", y = "Maximum vegetation height (cm)") +
     theme(plot.title = element_text(hjust = 0.5)) +
     ggtitle("All Sites")
   ggsave(
@@ -403,14 +433,14 @@ veg_height_season <- veg_height %>%
   for (k in 1:17) {
     p <- veg_height_comp %>%
       filter(site == k) %>%
-      ggplot(aes(x = period, y = maxhgt)) +
+      ggplot(aes(x = period, y = ((maxhgt - 1) * 25))) +
       geom_boxplot() +
-      theme_minimal(base_size = 12) +
+      theme_minimal(base_size = 15) +
       theme(
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()
       ) +
-      labs(x = "Sampling Period", y = "Maximum vegetation height") +
+      labs(x = "Sampling Period", y = "Maximum vegetation height (cm)") +
       theme(plot.title = element_text(hjust = 0.5)) +
       ggtitle(alt_labels[k]) +
       scale_x_discrete(labels = c("2002/2003", "2022/2023"))
@@ -426,14 +456,14 @@ veg_height_season <- veg_height %>%
   }
 
   p <- veg_height_comp %>%
-    ggplot(aes(x = period, y = maxhgt)) +
+    ggplot(aes(x = period, y = ((maxhgt - 1) * 25))) +
     geom_boxplot() +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 15) +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank()
     ) +
-    labs(x = "Sampling Period", y = "Maximum vegetation height") +
+    labs(x = "Sampling Period", y = "Maximum vegetation height (cm)") +
     theme(plot.title = element_text(hjust = 0.5)) +
     ggtitle("All Sites") +
     scale_x_discrete(labels = c("2002/2003", "2022/2023"))
@@ -512,6 +542,19 @@ model_maxhgt_period_sites <- veg_height_comp %>%
     random = ~replicate,
   )
 summary(model_maxhgt_period_sites)
+
+(x <- veg_height_comp %>%
+  group_by(period) %>%
+  summarise(across(where(is.numeric), mean)))
+
+(y <- x %>%
+  group_by(period) %>%
+  summarise(across(where(is.numeric), mean)) %>%
+  summarise(
+    tothits = (tothits[2] - tothits[1]) / tothits[1] * 100,
+    maxhgt = (maxhgt[2] - maxhgt[1]) / maxhgt[1] * 100
+  ))
+
 
 # synthesis ####
 {
@@ -611,7 +654,14 @@ summary(model_maxhgt_period_sites)
   site_data <- data.table::fread("./site_data/site_attributes.csv") %>%
     select(site, replicate, elevation, slope) %>%
     mutate(site = as.factor(site), replicate = as.factor(replicate))
-  fire_data <- readRDS("./fire_data/fire_history.rds") %>% select(-fire_years)
+
+  fire_data <- readRDS("./fire_data/fire_history.rds") %>%
+    select(-fire_years)
+  fire_data <- fire_data %>%
+    mutate(
+      d_fire = case_when(d_fire >= 43 ~ d_fire + 11, d_fire < 43 ~ d_fire)
+    )
+
   clim_data <- readRDS("./climate_data/clim_data.rds")
   clim_data_comp <- clim_data %>%
     filter(paste(year, month) != "2023 3") %>%
@@ -749,8 +799,24 @@ seasonal_data <- beet_wide %>%
     veg_cover_comp_long,
     veg_cover_season,
     veg_height,
-    veg_cover_comp,
-    veg_height_season,
-    veg_height_comp
+    veg_height_season
   )
 }
+
+### other trials
+# fire_data <- readRDS("./fire_data/fire_history.rds") %>%
+#   select(-fire_years)
+# fire_data <- fire_data %>%
+#   mutate(
+#     d_fire = case_when(d_fire >= 43 ~ d_fire + 11, d_fire < 43 ~ d_fire)
+#   )
+
+# xxx <- fire_data %>%
+#   filter(d_fire < 43)
+
+# yyy <- left_join(xxx, veg_height_comp)
+# yyy <- left_join(yyy, veg_cover_comp)
+
+# m1 <- lm(tothits ~ d_fire * site, data = yyy)
+# summary(m1)
+# rm(m1, xxx, yyy)
