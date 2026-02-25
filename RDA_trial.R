@@ -211,10 +211,12 @@ summary(model_full)
 fwd.sel$call
 spe.rda.signif <- rda(
   formula = Zspp_data ~ Name +
-    `NO3(mg/kg)` +
     AMin_tground +
-    mMax_tair +
-    rock_soil,
+    `C (%)` +
+    `H+ (cmol/Kg)` +
+    m_tground +
+    `NO3 (mg/kg)` +
+    Mg,
   data = Zenv_data
 )
 
@@ -227,6 +229,32 @@ anova.cca(spe.rda.signif, step = 1000)
 anova.cca(spe.rda.signif, step = 1000, by = "term")
 anova.cca(spe.rda.signif, step = 1000, by = "axis")
 ordiplot(spe.rda.signif, scaling = 1, type = "text")
+
+plot(
+  spe.rda.signif,
+  display = "bp",
+) #Show sites and species + env. variables
+# text(spe.rda.signif, "sites", col = "black", cex = 0.8) #Show sites names
+# ordihull(spe.rda.signif, group = spp_data_all$period, label = TRUE, ) #Link sites with polygones representing groups
+text(spe.rda.signif, "species", col = "red", cex = 0.8) #Show species names
+text(spe.rda.signif, "species", col = "red", cex = 0.8) #Show species names
+# points(spe.rda.signif, display = "sites") #Add points for sites
+points(spe.rda.signif, display = "species", pch = "+")
+x <- scores(spe.rda.signif)
+anova(spe.rda.signif, by = "axis", perm.max = 500) #Test significance of axis
+anova(spe.rda.signif) #Test significance of RDA
+
+
+smry <- summary(spe.rda.signif)
+df1 <- data.frame(smry$sites[, 1:2]) # PC1 and PC2
+df2 <- data.frame(smry$species[, 1:2]) # loadings for PC1 and PC2
+rda.plot <- ggplot(df1, aes(x = PC1, y = PC2)) +
+  geom_text(aes(label = rownames(df1)), size = 4) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  coord_fixed()
+rda.plot
+
 
 # glm trials ####
 
