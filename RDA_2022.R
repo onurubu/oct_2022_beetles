@@ -174,14 +174,7 @@ summary(fwd.sel)
 summary(model_full)
 fwd.sel$call
 spe.rda.signif <- rda(
-  formula = Zspp_data ~ Name +
-    veg_type +
-    AMax_precip +
-    d_fire +
-    mMax_precip +
-    elevation +
-    AMax_tground +
-    m_tair,
+  formula = as.formula(fwd.sel$call),
   data = Zenv_data
 )
 

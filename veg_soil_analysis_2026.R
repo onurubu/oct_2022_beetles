@@ -803,7 +803,7 @@ seasonal_data <- beet_wide %>%
   )
 }
 
-### other trials
+### other trials ####
 # fire_data <- readRDS("./fire_data/fire_history.rds") %>%
 #   select(-fire_years)
 # fire_data <- fire_data %>%

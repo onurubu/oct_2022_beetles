@@ -19,28 +19,27 @@ rm(list = ls())
 }
 
 # reading in raw data with correct data types
-
-alt_labels <- c(
-  "0m(W)",
-  "200m(W)",
-  "300m(W)",
-  "500m(W)",
-  "700m(W)",
-  "900m(W)",
-  "1100m(W)",
-  "1300m(W)",
-  "1500m(W)",
-  "1700m(W)",
-  "1900m(W)",
-  "1700m(E)",
-  "1500m(E)",
-  "1300m(E)",
-  "1100m(E)",
-  "900m(E)",
-  "500m(E)"
-)
-
 {
+  alt_labels <- c(
+    "0m(W)",
+    "200m(W)",
+    "300m(W)",
+    "500m(W)",
+    "700m(W)",
+    "900m(W)",
+    "1100m(W)",
+    "1300m(W)",
+    "1500m(W)",
+    "1700m(W)",
+    "1900m(W)",
+    "1700m(E)",
+    "1500m(E)",
+    "1300m(E)",
+    "1100m(E)",
+    "900m(E)",
+    "500m(E)"
+  )
+
   beet_wern <- read.csv(
     "./working_beetle_data/beet_wern_ID.csv",
     stringsAsFactors = TRUE
@@ -138,9 +137,9 @@ alt_labels <- c(
   # data.table::fwrite(abund_all, file = "./raw_identified_beetle_compiled_datasets/all_families_grouped.csv")
 
   rm(abund_modern, abund_old, beet_wern, df1, df2, beet_22, beet_23)
-}
 
-abund_all <- abund_all %>% filter(paste(year, season) != "2023 March")
+  abund_all <- abund_all %>% filter(paste(year, season) != "2023 March")
+}
 
 Sys.sleep(0.1)
 

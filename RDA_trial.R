@@ -73,123 +73,122 @@ Zenv_data <- Zenv_data %>%
 # ==========================================
 # Run RDA including ALL environmental variables
 # ==========================================
-tbRDA <- rda(Zspp_data ~ ., data = Zenv_data)
+# tbRDA <- rda(Zspp_data ~ ., data = Zenv_data)
 
-# ==========================================
-# Check and test RDA
-# ==========================================
-summary(tbRDA)
-anova(tbRDA, by = "axis", perm.max = 500)
-anova(tbRDA)
+# # ==========================================
+# # Check and test RDA
+# # ==========================================
+# summary(tbRDA)
+# anova(tbRDA, by = "axis", perm.max = 500)
+# anova(tbRDA)
 
+# ####MODELS####
 
-####MODELS####
+# #Regression analysis - Tests to select the variables you keep for the final analysis
+# ef <- envfit(tbRDA, Zenv_data, choices = c(1, 2))
+# ef #Keep significant or very important variables
+# tbRDA1 <- rda(
+#   Zspp_data ~ bare_ground +
+#     litter +
+#     rock +
+#     veg +
+#     rock_soil +
+#     clay +
+#     sand +
+#     silt +
+#     `NO3(mg/kg)` +
+#     `C(%)` +
+#     tothits +
+#     maxhgt +
+#     d_fire +
+#     m_tground +
+#     mMax_tground +
+#     mMin_tground +
+#     AMax_tground +
+#     AMin_tground +
+#     range_tground +
+#     m_tair +
+#     mMax_tair +
+#     mMin_tair +
+#     AMin_tair +
+#     m_precip +
+#     mMax_precip +
+#     mMin_precip +
+#     AMax_precip +
+#     range_precip +
+#     elevation +
+#     slope,
+#   data = Zenv_data
+# )
 
-#Regression analysis - Tests to select the variables you keep for the final analysis
-ef <- envfit(tbRDA, Zenv_data, choices = c(1, 2))
-ef #Keep significant or very important variables
-tbRDA1 <- rda(
-  Zspp_data ~ bare_ground +
-    litter +
-    rock +
-    veg +
-    rock_soil +
-    clay +
-    sand +
-    silt +
-    `NO3(mg/kg)` +
-    `C(%)` +
-    tothits +
-    maxhgt +
-    d_fire +
-    m_tground +
-    mMax_tground +
-    mMin_tground +
-    AMax_tground +
-    AMin_tground +
-    range_tground +
-    m_tair +
-    mMax_tair +
-    mMin_tair +
-    AMin_tair +
-    m_precip +
-    mMax_precip +
-    mMin_precip +
-    AMax_precip +
-    range_precip +
-    elevation +
-    slope,
-  data = Zenv_data
-)
+# tbRDA2 <- rda(
+#   Zspp_data ~ bare_ground +
+#     litter +
+#     rock +
+#     veg +
+#     rock_soil +
+#     clay +
+#     sand +
+#     silt +
+#     `NO3(mg/kg)` +
+#     `C(%)` +
+#     tothits +
+#     maxhgt +
+#     m_tground +
+#     mMax_tground +
+#     mMin_tground +
+#     AMax_tground +
+#     AMin_tground +
+#     range_tground +
+#     m_tair +
+#     mMax_tair +
+#     mMin_tair +
+#     AMin_tair +
+#     m_precip +
+#     mMax_precip +
+#     mMin_precip +
+#     AMax_precip +
+#     range_precip +
+#     elevation +
+#     slope,
+#   data = Zenv_data
+# )
 
-tbRDA2 <- rda(
-  Zspp_data ~ bare_ground +
-    litter +
-    rock +
-    veg +
-    rock_soil +
-    clay +
-    sand +
-    silt +
-    `NO3(mg/kg)` +
-    `C(%)` +
-    tothits +
-    maxhgt +
-    m_tground +
-    mMax_tground +
-    mMin_tground +
-    AMax_tground +
-    AMin_tground +
-    range_tground +
-    m_tair +
-    mMax_tair +
-    mMin_tair +
-    AMin_tair +
-    m_precip +
-    mMax_precip +
-    mMin_precip +
-    AMax_precip +
-    range_precip +
-    elevation +
-    slope,
-  data = Zenv_data
-)
+# tbRDA3 <- rda(
+#   Zspp_data ~ bare_ground +
+#     litter +
+#     rock +
+#     veg +
+#     rock_soil +
+#     clay +
+#     sand +
+#     silt +
+#     `NO3(mg/kg)` +
+#     `C(%)` +
+#     maxhgt +
+#     m_tground +
+#     mMax_tground +
+#     mMin_tground +
+#     AMax_tground +
+#     AMin_tground +
+#     range_tground +
+#     m_tair +
+#     mMax_tair +
+#     mMin_tair +
+#     AMin_tair +
+#     m_precip +
+#     mMax_precip +
+#     mMin_precip +
+#     AMax_precip +
+#     range_precip +
+#     elevation +
+#     slope,
+#   data = Zenv_data
+# )
 
-tbRDA3 <- rda(
-  Zspp_data ~ bare_ground +
-    litter +
-    rock +
-    veg +
-    rock_soil +
-    clay +
-    sand +
-    silt +
-    `NO3(mg/kg)` +
-    `C(%)` +
-    maxhgt +
-    m_tground +
-    mMax_tground +
-    mMin_tground +
-    AMax_tground +
-    AMin_tground +
-    range_tground +
-    m_tair +
-    mMax_tair +
-    mMin_tair +
-    AMin_tair +
-    m_precip +
-    mMax_precip +
-    mMin_precip +
-    AMax_precip +
-    range_precip +
-    elevation +
-    slope,
-  data = Zenv_data
-)
-
-summary(tbRDA1)
-summary(tbRDA2)
-summary(tbRDA3)
+# summary(tbRDA1)
+# summary(tbRDA2)
+# summary(tbRDA3)
 
 # Coskun trials ####
 
@@ -198,25 +197,28 @@ summary(tbRDA3)
 model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
 # Forward selection of variables:
-fwd.sel <- ordistep(
+# fwd.sel <- ordistep(
+#   rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
+#   scope = formula(model_full), # upper model limit (the "full" model)
+#   direction = "forward",
+#   R2scope = TRUE, # can't surpass the "full" model's R2
+#   pstep = 1000,
+#   trace = FALSE
+# ) # change to TRUE to see the selection process!
+
+fwd.sel <- ordiR2step(
   rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
   scope = formula(model_full), # upper model limit (the "full" model)
-  direction = "forward",
   R2scope = TRUE, # can't surpass the "full" model's R2
   pstep = 1000,
   trace = FALSE
 ) # change to TRUE to see the selection process!
+
 summary(fwd.sel)
 summary(model_full)
 fwd.sel$call
 spe.rda.signif <- rda(
-  formula = Zspp_data ~ Name +
-    AMin_tground +
-    `C (%)` +
-    `H+ (cmol/Kg)` +
-    m_tground +
-    `NO3 (mg/kg)` +
-    Mg,
+  formula = as.formula(fwd.sel$call),
   data = Zenv_data
 )
 
@@ -271,10 +273,13 @@ hist_full <- full_join(abund_all, env_all) %>%
 glm_env_period <- hist_full %>%
   MCMCglmm(
     data = .,
-    fixed = abundance ~ (`NO3(mg/kg)` +
-      AMin_tground +
+    fixed = abundance ~ (AMin_tground +
+      `C (%)` +
+      `H+ (cmol/Kg)` +
       mMax_tair +
-      rock_soil),
+      `NO3 (mg/kg)` +
+      Mg) *
+      period,
     random = ~site,
     family = "poisson"
   )
