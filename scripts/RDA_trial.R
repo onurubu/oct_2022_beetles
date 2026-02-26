@@ -197,28 +197,39 @@ Zenv_data <- Zenv_data %>%
 model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
 # Forward selection of variables:
-# fwd.sel <- ordistep(
-#   rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
-#   scope = formula(model_full), # upper model limit (the "full" model)
-#   direction = "forward",
-#   R2scope = TRUE, # can't surpass the "full" model's R2
-#   pstep = 1000,
-#   trace = FALSE
-# ) # change to TRUE to see the selection process!
-
-fwd.sel <- ordiR2step(
+fwd.sel <- ordistep(
   rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
   scope = formula(model_full), # upper model limit (the "full" model)
+  direction = "forward",
   R2scope = TRUE, # can't surpass the "full" model's R2
   pstep = 1000,
   trace = FALSE
 ) # change to TRUE to see the selection process!
 
+# fwd.sel <- ordiR2step(
+#   rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
+#   scope = formula(model_full), # upper model limit (the "full" model)
+#   R2scope = TRUE, # can't surpass the "full" model's R2
+#   pstep = 1000,
+#   trace = FALSE
+# ) # change to TRUE to see the selection process!
+
 summary(fwd.sel)
 summary(model_full)
 fwd.sel$call
+# spe.rda.signif <- rda(
+#   formula = as.formula(fwd.sel$call),
+#   data = Zenv_data
+# )
+
 spe.rda.signif <- rda(
-  formula = as.formula(fwd.sel$call),
+  formula = Zspp_data ~ Name +
+    AMin_tground +
+    `C (%)` +
+    `H+ (cmol/Kg)` +
+    mMax_tair +
+    `NO3 (mg/kg)` +
+    Mg,
   data = Zenv_data
 )
 
@@ -247,15 +258,40 @@ anova(spe.rda.signif, by = "axis", perm.max = 500) #Test significance of axis
 anova(spe.rda.signif) #Test significance of RDA
 
 
-smry <- summary(spe.rda.signif)
-df1 <- data.frame(smry$sites[, 1:2]) # PC1 and PC2
+smry <- scores(spe.rda.signif)
+df1 <- cbind(data.frame(smry$sites[, 1:2]), Zenv_data)
 df2 <- data.frame(smry$species[, 1:2]) # loadings for PC1 and PC2
-rda.plot <- ggplot(df1, aes(x = PC1, y = PC2)) +
-  geom_text(aes(label = rownames(df1)), size = 4) +
+df3 <- data.frame(smry$regression)
+rda.plot <- ggplot(
+  df1,
+  aes(x = RDA1, y = RDA2, shape = veg_type, col = veg_type)
+) +
+  geom_point(position = position_jitter()) +
   geom_hline(yintercept = 0, linetype = "dotted") +
   geom_vline(xintercept = 0, linetype = "dotted") +
   coord_fixed()
 rda.plot
+
+rda.biplot <- rda.plot +
+  geom_segment(
+    data = df2,
+    aes(x = 0, xend = RDA1, y = 0, yend = RDA2),
+    color = "red",
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  geom_text(
+    data = df2,
+    aes(
+      x = RDA1,
+      y = RDA2,
+      label = rownames(df2),
+      hjust = 0.5 * (1 - sign(RDA1)),
+      vjust = 0.5 * (1 - sign(RDA2))
+    ),
+    color = "red",
+    size = 4
+  )
+rda.biplot
 
 
 # glm trials ####
