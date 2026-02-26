@@ -1380,10 +1380,6 @@ gridExtra::grid.arrange(p7, p8)
   rm(x, y, Herb_community.mds, MDS_xy, p1, p2, p4, p5, p6)
 }
 
-dist <- vegdist(x, method = "bray")
-anosim_type <- anosim(dist, y$veg_type)
-summary(anosim_type)
-
 # site-specific ##
 
 for (k in 1:17) {
@@ -1402,7 +1398,7 @@ for (k in 1:17) {
   pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
     geom_jitter() +
     theme_bw() +
-    ggtitle(paste0("Site ", k, ", species abundance by year")) +
+    ggtitle(paste0("Site ", k, ", species presence by year")) +
     scale_color_discrete(name = "Year")
 
   ggsave(
@@ -1443,7 +1439,7 @@ for (k in 1:17) {
     ) %>%
     relocate(site, replicate, year, veg_type) %>%
     group_by(year, season, site, replicate, veg_type) %>%
-    summarise(across(where(is.numeric), mean), .groups = "drop")
+    summarise(across(where(is.numeric), sum), .groups = "drop")
   x <- dat[, 6:47] %>% filter(rowSums(across(where(is.numeric))) != 0)
   y <- dat %>% filter(rowSums(across(where(is.numeric))) != 0) %>% select(1:5)
   Herb_community.mds <- x %>%
@@ -1459,19 +1455,19 @@ for (k in 1:17) {
     geom_point() +
     stat_ellipse() +
     theme_bw() +
-    ggtitle("Mean species abundance by year") +
+    ggtitle("Species abundance by year") +
     scale_color_discrete(name = "Year")
   p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = veg_type)) +
     geom_point() +
     stat_ellipse() +
     theme_bw() +
-    ggtitle("Mean species abundance by vegetation type") +
+    ggtitle("Species abundance by vegetation type") +
     scale_color_discrete(name = "Vegetation type")
   # p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) + theme_bw() + geom_point(alpha = 0) + ggtitle("Species abundance by year with sites, overlaps jittered") + scale_color_discrete(name = "Year", guide = guide_legend(override.aes = list(alpha = 1))) + ggrepel::geom_text_repel(data = MDS_xy, mapping = aes(MDS1, MDS2, label = site), show.legend = FALSE, max.overlaps = 1000)
   p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
     theme_bw() +
     geom_point(alpha = 0) +
-    ggtitle("Mean species abundance by year with sites") +
+    ggtitle("Species abundance by year with sites") +
     scale_color_discrete(
       name = "Year",
       guide = guide_legend(override.aes = list(alpha = 1))
@@ -1484,7 +1480,7 @@ for (k in 1:17) {
   p5 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = veg_type)) +
     theme_bw() +
     geom_point(alpha = 0) +
-    ggtitle("Mean species abundance by vegetation type") +
+    ggtitle("Species abundance by vegetation type") +
     stat_ellipse() +
     scale_color_discrete(
       name = "Vegetation Type",
@@ -1498,7 +1494,7 @@ for (k in 1:17) {
   p6 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = site)) +
     theme_bw() +
     geom_point(alpha = 0) +
-    ggtitle("Mean species abundance by site") +
+    ggtitle("Species abundance by site") +
     stat_ellipse() +
     scale_color_discrete(
       name = "Site",
@@ -1579,7 +1575,7 @@ for (k in 1:17) {
   pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
     geom_jitter() +
     theme_bw() +
-    ggtitle(paste0("Site ", k, ", mean species abundance by year")) +
+    ggtitle(paste0("Site ", k, ", species abundance by year")) +
     scale_color_discrete(name = "Year")
 
   ggsave(
