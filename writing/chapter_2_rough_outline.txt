@@ -1,0 +1,56 @@
+Intro
+	Insect assemblages and what affects them
+	Insect assemblages across altitudinal gradients and how the prior mentioned factors change across such a gradient
+	Which factors that affect insect assemblages affect beetles specifically to the greatest degree
+	Why those factors affect beetles and how might those factors be changing under climate change
+		Distinction between baseline climactic changes and protracted short-term climactic phenomena
+	The effects of biotic factors compounded with abiotic factors
+	
+	Assessing all of these variables through environmental monitoring, long-term insect assemblage sampling, monitoring across an altitudinal gradient
+	
+	The background of this study emphasising the replication and the foundations that it was built upon. The introduction of the transect and description of the area and the context of the environment
+	
+	Aims: quantify and qualify environmental changes, assemblage changes, altitudinal range shifts, seasonal comparison, historical comparison, in order to answer the above questions
+Methods
+	The study site
+		Vegetation structure
+	Beetle lab work:
+		INSECT sampling set-up across transect and how often it was repeated (configuration and timing)
+			Which seasons the BEETLES were sorted and to what extent they were identified
+				How the beetles were sorted, identified, pinned/mounted, and stored	
+	 Beetles data:
+		How the sorted and identified beetle data was captured and stored
+		How the historical beetle data was captured and used in comparison
+			The "Three species", how they were decided, and how they also focused future sorting and identification of beetles
+	Environmental variables:
+		How was soil sampled and analysed in the lab
+			How were those results used in this analysis
+		How was ground (vegetation) cover estimated
+		How was vegetation height estimated
+		How was temperature measured and utilised
+			Different types of temperature measurement and how microclimate modelling occurred
+			Precipitation somewhere
+		How was fire analysed and used in data analyses
+	Synthesis:
+		How were the environmental variables and the beetle data utilised together to analyse the state of the beetle assemblage, and perform comparisons.
+Results
+	Beetle changes
+		Modern Seasonal analysis
+		Historical analyses:
+			Changes in beetles over separate years and sampling period, vegetation type.
+				Whole transect and site-by site (maybe)
+	Comparison of vegetation cover and height over time
+	Comparison of soil attributes
+	Seasonal decomposition
+	
+	
+	
+Discussion
+	DONE IN DOCUMENT
+	
+
+TODOS:
+	Add the range shifts for the historical data as well, completely forgot.
+	Model the precipitation STRs and add those
+	
+	
