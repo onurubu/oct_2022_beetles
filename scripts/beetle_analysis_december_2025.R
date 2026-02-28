@@ -16,6 +16,7 @@ rm(list = ls())
   library(hms)
   library(vegan)
   library(MCMCglmm)
+  library(data.table)
 }
 
 # reading in raw data with correct data types

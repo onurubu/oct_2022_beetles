@@ -557,6 +557,7 @@ summary(model_maxhgt_period_sites)
 
 
 # synthesis ####
+
 {
   veg_cover <- data.table::fread("./veg_cover_data/veg_cover_all.csv") %>%
     mutate(across(
@@ -666,6 +667,16 @@ summary(model_maxhgt_period_sites)
   clim_data_comp <- clim_data %>%
     filter(paste(year, month) != "2023 3") %>%
     select(-month)
+
+  clim_data_ex_comp <- readRDS("./climate_data/extra_clim_data.rds") %>%
+    group_by("year" = year(obs_time), "month" = month(obs_time)) %>%
+    filter(month == 10, year %in% c(2002, 2003, 2022, 2023)) %>%
+    ungroup() %>%
+    group_by(year, site, replicate) %>%
+    summarise(across(where(is.numeric), mean), .groups = "drop") %>%
+    mutate(year = as.factor(year), month = as.factor(month)) %>%
+    relocate(site, replicate, year, month)
+
   altitudes <- c(
     0,
     200,
@@ -686,11 +697,33 @@ summary(model_maxhgt_period_sites)
     500
   )
 
+  site_areas <- c(
+    3082.58,
+    1531.61,
+    1531.61,
+    765.43,
+    447.53,
+    370.14,
+    282.66,
+    206.59,
+    106.73,
+    21.47,
+    3.40,
+    6.76,
+    39.32,
+    76.94,
+    232.54,
+    607.88,
+    1353.37
+  )
+
   {
     dat <- full_join(veg_cover_comp, soil_dat)
     dat <- full_join(dat, veg_height_comp)
     dat <- full_join(dat, fire_data)
     dat <- full_join(dat, clim_data_comp)
+    dat <- full_join(dat, clim_data_ex_comp)
+
     env_all <- left_join(dat, site_data) %>%
       mutate(
         veg_type = factor(case_when(
@@ -704,16 +737,10 @@ summary(model_maxhgt_period_sites)
         slope = (case_when(
           site %in% c(1:11) ~ 1,
           site %in% c(12:17) ~ 2,
-        ))
+        )),
+        area = site_areas[site]
       ) %>%
       relocate(veg_type, .after = period)
-    # mutate(
-    #   abundance = rowSums(across(c(
-    #     anthia_decemguttata,
-    #     stenocara_dentata,
-    #     zophosis_gracilicornis
-    #   )))
-    # )
     rm(dat)
   }
 }
@@ -779,19 +806,14 @@ seasonal_data <- beet_wide %>%
       ))
     ) %>%
     relocate(veg_type, .after = replicate)
-  # mutate(
-  #   abundance = rowSums(across(c(
-  #     anthia_decemguttata,
-  #     stenocara_dentata,
-  #     zophosis_gracilicornis
-  #   )))
-  # )
+
   rm(
     dat,
     xcover,
     xfire,
     clim_data_season,
     clim_data_comp,
+    clim_data_ex_comp,
     clim_data,
     fire_data,
     soil_dat,

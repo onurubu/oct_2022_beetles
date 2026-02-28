@@ -67,93 +67,11 @@ Zenv_data <- Zenv_data %>%
       Name %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
       Name %in% c(11) ~ "alpine",
       Name %in% c(17) ~ "succulent_karoo"
-    ))
+    )),
+    # period = factor(rep(c("old", "modern"), each = 136)),
+    # year = factor(rep(c("2002", "2003", "2022", "2023"), each = 68))
   ) %>%
   select(-AMin_precip)
-# ==========================================
-# Run RDA including ALL environmental variables
-# ==========================================
-tbRDA <- rda(Zspp_data ~ ., data = Zenv_data)
-
-# ==========================================
-# Check and test RDA
-# ==========================================
-summary(tbRDA)
-anova(tbRDA, by = "axis", perm.max = 500)
-anova(tbRDA)
-
-
-####MODELS####
-
-#Regression analysis - Tests to select the variables you keep for the final analysis
-ef <- envfit(tbRDA, Zenv_data, choices = c(1, 2))
-ef #Keep significant or very important variables
-tbRDA1 <- rda(
-  Zspp_data ~ bare_ground +
-    litter +
-    rock +
-    veg +
-    tothits +
-    maxhgt +
-    d_fire +
-    mMin_tground +
-    mMax_tair +
-    mMin_tair +
-    AMin_tair +
-    m_precip +
-    mMax_precip +
-    mMin_precip +
-    AMax_precip +
-    range_precip +
-    elevation +
-    slope,
-  data = Zenv_data
-)
-
-tbRDA2 <- rda(
-  Zspp_data ~ bare_ground +
-    litter +
-    rock +
-    veg +
-    tothits +
-    maxhgt +
-    d_fire +
-    mMin_tground +
-    mMax_tair +
-    mMin_tair +
-    AMin_tair +
-    m_precip +
-    mMax_precip +
-    mMin_precip +
-    AMax_precip +
-    range_precip +
-    elevation +
-    slope,
-  data = Zenv_data
-)
-
-tbRDA3 <- rda(
-  Zspp_data ~ bare_ground +
-    litter +
-    rock +
-    veg +
-    maxhgt +
-    d_fire +
-    mMin_tground +
-    mMin_tair +
-    AMin_tair +
-    m_precip +
-    mMax_precip +
-    AMax_precip +
-    range_precip +
-    elevation +
-    slope,
-  data = Zenv_data
-)
-
-summary(tbRDA1)
-summary(tbRDA2)
-summary(tbRDA3)
 
 # Coskun trials ####
 
@@ -169,24 +87,19 @@ fwd.sel <- ordistep(
   R2scope = TRUE, # can't surpass the "full" model's R2
   pstep = 1000,
   trace = FALSE
-) # change to TRUE to see the selection process!
+)
+
+fwd.sel$call
+
 summary(fwd.sel)
 summary(model_full)
-fwd.sel$call
-spe.rda.signif <- rda(
-  formula = Zspp_data ~ m_tair +
-    AMin_tair +
-    mMin_tground +
-    mMin_tair +
-    bare_ground +
-    Name +
-    mMax_precip +
-    d_fire +
-    m_precip +
-    mMin_precip +
-    m_tground,
-  data = Zenv_data
-)
+
+# spe.rda.signif <- rda(
+#   formula = as.formula(fwd.sel$call),
+#   data = Zenv_data
+# )
+
+spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
 
 summary(spe.rda.signif)
 RsquareAdj(spe.rda.signif)
@@ -197,6 +110,65 @@ anova.cca(spe.rda.signif, step = 1000)
 anova.cca(spe.rda.signif, step = 1000, by = "term")
 anova.cca(spe.rda.signif, step = 1000, by = "axis")
 ordiplot(spe.rda.signif, scaling = 1, type = "text")
+
+plot(
+  spe.rda.signif,
+  display = "bp",
+) #Show sites and species + env. variables
+# text(spe.rda.signif, "sites", col = "black", cex = 0.8) #Show sites names
+# ordihull(spe.rda.signif, group = spp_data_all$period, label = TRUE, ) #Link sites with polygones representing groups
+text(spe.rda.signif, "species", col = "red", cex = 0.8) #Show species names
+text(spe.rda.signif, "species", col = "red", cex = 0.8) #Show species names
+# points(spe.rda.signif, display = "sites") #Add points for sites
+points(spe.rda.signif, display = "species", pch = "+")
+x <- scores(spe.rda.signif)
+anova(spe.rda.signif, by = "axis", perm.max = 500) #Test significance of axis
+anova(spe.rda.signif) #Test significance of RDA
+
+
+smry <- scores(spe.rda.signif)
+df1 <- cbind(data.frame(smry$sites[, 1:2]), Zenv_data)
+df2 <- data.frame(smry$species[, 1:2]) # loadings for PC1 and PC2
+
+{
+  df3 <- data.frame(smry$regression)
+  df3 <- df3[!rownames(df3) %like% "Name", ]
+}
+
+rda.plot <- ggplot(df1, aes(x = RDA1, y = RDA2)) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dotted")
+
+rda.plot
+
+rda.biplot <- rda.plot +
+  geom_segment(
+    data = df3,
+    aes(x = 0, xend = RDA1, y = 0, yend = RDA2),
+    color = "red",
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  geom_text(
+    data = df3,
+    aes(
+      x = RDA1,
+      y = RDA2,
+      label = rownames(df3),
+      hjust = 0.5 * (1 - sign(RDA1)),
+      vjust = 0.5 * (1 - sign(RDA2))
+    ),
+    color = "red",
+    size = 4
+  ) +
+  scale_x_continuous(limits = c(-1.1, 2.1)) +
+  geom_point(
+    data = df1,
+    aes(x = RDA1, y = RDA2, shape = veg_type, col = veg_type),
+    cex = 3,
+    position = position_jitter()
+  )
+
+rda.biplot
 
 # glm trials ####
 
