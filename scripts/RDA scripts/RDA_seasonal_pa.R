@@ -8,8 +8,8 @@ library(grDevices)
 # ==========================================
 # Import data
 # ==========================================
-env_data_all <- env_all
-spp_data_all <- abund_all
+env_data_all <- env_season
+spp_data_all <- abund_seasonal
 
 # ==========================================
 # Clean environmental data
@@ -19,7 +19,7 @@ env_data <- env_data_all
 # ==========================================
 # Prepare species data
 # ==========================================
-spp_data <- decostand(spp_data_all[, -c(1:5)], method = "hellinger") # remove non-species columns if needed
+spp_data <- decostand(spp_data_all[, -c(1:5)], method = "pa")
 
 # ==========================================
 # Standardize (z-score transform)
@@ -48,51 +48,48 @@ Zenv_data <- Zenv_data %>%
       Name %in% c(11) ~ "alpine",
       Name %in% c(17) ~ "succulent_karoo"
     )),
-    period = factor(rep(c("old", "modern"), each = 136)),
-    year = factor(rep(c("2002", "2003", "2022", "2023"), each = 68))
   ) %>%
   select(-AMin_precip)
 
 model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
 # Forward selection of variables:
-{
-  fwd.sel <- ordistep(
-    rda(formula(model_full), data = Zenv_data), # lower model limit (simple!)
-    scope = formula(Zspp_data ~ 1), # upper model limit (the "full" model)
-    direction = "backward",
-    R2scope = TRUE, # can't surpass the "full" model's R2
-    pstep = 1000,
-    trace = FALSE
-  )
+fwd.sel <- ordistep(
+  rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
+  scope = formula(model_full), # upper model limit (the "full" model)
+  direction = "forward",
+  R2scope = FALSE, # can't surpass the "full" model's R2
+  trace = FALSE
+)
 
-  fwd.sel$call
-}
+fwd.sel$call
 
 {
   spe.rda.signif <- rda(
-    formula = Zspp_data ~ Name +
-      period +
-      `Mg (%)` +
-      Ca +
-      `Ca (%)` +
-      mMax_tair +
-      `pH (Kcl)` +
-      veg +
-      mMax_precip,
+    formula = Zspp_data ~ AMin_tair +
+      Name +
+      relhum +
+      AMax_precip +
+      windspeed +
+      # mMin_precip +
+      lwdown +
+      d_fire +
+      mMin_tground +
+      m_tground,
     data = Zenv_data
   )
-  # spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
+
   RsquareAdj(spe.rda.signif)
 }
+
+# spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
+
 RsquareAdj(model_full)
 
 summary(fwd.sel)
 summary(model_full)
 
 summary(spe.rda.signif)
-
-RsquareAdj(model_full)
 
 anova.cca(spe.rda.signif, step = 1000)
 anova.cca(spe.rda.signif, step = 1000, by = "term")
@@ -148,19 +145,19 @@ ef
         color = "black",
         size = 6
       ) +
-      geom_text(
-        data = df2,
-        aes(
-          x = RDA1,
-          y = RDA2,
-          label = rownames(df2)
-        ),
-        color = "blue",
-        vjust = "inward",
-        hjust = "inward",
-        size = 5
-      ) +
-      scale_x_continuous(limits = c(-0.6, 1.64)) +
+      # geom_text(
+      #   data = df2,
+      #   aes(
+      #     x = RDA1,
+      #     y = RDA2,
+      #     label = rownames(df2)
+      #   ),
+      #   color = "blue",
+      #   vjust = "inward",
+      #   hjust = "inward",
+      #   size = 5
+      # ) +
+      scale_x_continuous(limits = c(-0.9, 1)) +
       scale_colour_discrete(
         labels = c(
           "Alpine",
@@ -187,38 +184,36 @@ ef
   }
 }
 
-
 # glm trials ####
 
-hist_full <- full_join(abund_all, env_all) %>%
-  mutate(slope = Zenv_data$slope) %>%
-  mutate(
-    abundance = rowSums(across(c(
-      anthia_decemguttata,
-      stenocara_dentata,
-      zophosis_gracilicornis
-    )))
-  )
+# hist_full <- full_join(abund_all, env_all) %>%
+#   mutate(slope = Zenv_data$slope) %>%
+#   mutate(
+#     abundance = rowSums(across(c(
+#       anthia_decemguttata,
+#       stenocara_dentata,
+#       zophosis_gracilicornis
+#     )))
+#   )
 
-glm_env_period <- hist_full %>%
-  MCMCglmm(
-    data = .,
-    fixed = abundance ~ (site +
-      AMin_tground +
-      d_fire +
-      `C (%)` +
-      `H+ (cmol/Kg)` +
-      mMax_tair +
-      `NO3 (mg/kg)` +
-      Mg +
-      pres +
-      rock_soil) *
-      period,
-    random = ~site,
-    family = "poisson"
-  )
-summary(glm_env_period)
-
+# glm_env_period <- hist_full %>%
+#   MCMCglmm(
+#     data = .,
+#     fixed = abundance ~ (site +
+#       AMin_tground +
+#       d_fire +
+#       `C (%)` +
+#       `H+ (cmol/Kg)` +
+#       mMax_tair +
+#       `NO3 (mg/kg)` +
+#       Mg +
+#       pres +
+#       rock_soil) *
+#       period,
+#     random = ~site,
+#     family = "poisson"
+#   )
+# summary(glm_env_period)
 
 ##############################################
 # Indicator Species Analysis by Vegetation Type
@@ -245,8 +240,8 @@ run_indval_by_veg <- function(Sampling_event_label) {
   message("Running IndVal for: ", Sampling_event_label)
 
   # Subset environmental and species data
-  env_sub <- env_data_all %>% filter(period == Sampling_event_label)
-  spp_sub <- spp_data_all[env_data_all$period == Sampling_event_label, ]
+  env_sub <- env_data_all %>% filter(year == Sampling_event_label)
+  spp_sub <- spp_data_all[env_data_all$year == Sampling_event_label, ]
 
   # Extract species abundance matrix
   spp_matrix <- spp_sub[, 6:ncol(spp_sub)]
@@ -300,8 +295,8 @@ run_indval_by_veg <- function(Sampling_event_label) {
 # =====================================================
 # Run IndVal for both sampling events
 # =====================================================
-indval_2002_2003 <- run_indval_by_veg("old")
-indval_2022_2023 <- run_indval_by_veg("modern")
+indval_2002_2003 <- run_indval_by_veg("2022")
+indval_2022_2023 <- run_indval_by_veg("2023")
 
 # =====================================================
 # Combine all results
@@ -353,9 +348,9 @@ compare_tbl <- compare_tbl %>%
         !is.na(Veg_2022_2023) &
         Veg_2002_2003 == Veg_2022_2023 ~ "Shared indicator",
       !is.na(Veg_2002_2003) &
-        is.na(Veg_2022_2023) ~ "Lost indicator (2002–2003 only)",
+        is.na(Veg_2022_2023) ~ "Lost indicator (2022 only)",
       is.na(Veg_2002_2003) &
-        !is.na(Veg_2022_2023) ~ "New indicator (2022–2023 only)",
+        !is.na(Veg_2022_2023) ~ "New indicator (2023 only)",
       !is.na(Veg_2002_2003) &
         !is.na(Veg_2022_2023) &
         Veg_2002_2003 !=
@@ -384,7 +379,7 @@ message(
 compare_tbl_plot <- compare_tbl %>%
   mutate(
     VegType_plot = case_when(
-      Status == "New indicator (2022–2023 only)" ~ Veg_2022_2023,
+      Status == "New indicator (2023 only)" ~ Veg_2022_2023,
       TRUE ~ Veg_2002_2003
     )
   )
@@ -437,7 +432,8 @@ stopifnot(nrow(spp_data_all) == nrow(env_data_all))
 # =====================================================
 env_data_all <- env_data_all %>%
   mutate(Slope = ifelse(slope == 1, "W", ifelse(slope == 2, "E", slope))) %>%
-  select(-slope)
+  select(-slope) %>%
+  mutate(elevation = altitudes[site])
 
 # If Slope is a factor, ensure it stays that way
 env_data_all$Slope <- factor(env_data_all$Slope, levels = c("W", "E"))
@@ -449,8 +445,8 @@ run_indval_by_elevslope <- function(Sampling_event_label) {
   message("Running IndVal for: ", Sampling_event_label)
 
   # Subset environmental and species data
-  env_sub <- env_data_all %>% filter(period == Sampling_event_label)
-  spp_sub <- spp_data_all[env_data_all$period == Sampling_event_label, ]
+  env_sub <- env_data_all %>% filter(year == Sampling_event_label)
+  spp_sub <- spp_data_all[env_data_all$year == Sampling_event_label, ]
 
   # Extract species abundance matrix
   spp_matrix <- spp_sub[, 6:ncol(spp_sub)]
@@ -508,8 +504,8 @@ run_indval_by_elevslope <- function(Sampling_event_label) {
 # =====================================================
 # Run for both sampling events
 # =====================================================
-indval_2002_2003 <- run_indval_by_elevslope("old")
-indval_2022_2023 <- run_indval_by_elevslope("modern")
+indval_2002_2003 <- run_indval_by_elevslope("2022")
+indval_2022_2023 <- run_indval_by_elevslope("2023")
 
 # Combine both
 indval_all <- bind_rows(indval_2002_2003, indval_2022_2023)
@@ -558,9 +554,9 @@ compare_tbl <- compare_tbl %>%
         !is.na(ElevSlope_2022_2023) &
         ElevSlope_2002_2003 == ElevSlope_2022_2023 ~ "Shared indicator",
       !is.na(ElevSlope_2002_2003) &
-        is.na(ElevSlope_2022_2023) ~ "Lost indicator (2002–2003 only)",
+        is.na(ElevSlope_2022_2023) ~ "Lost indicator (2022 only)",
       is.na(ElevSlope_2002_2003) &
-        !is.na(ElevSlope_2022_2023) ~ "New indicator (2022–2023 only)",
+        !is.na(ElevSlope_2022_2023) ~ "New indicator (2023 only)",
       !is.na(ElevSlope_2002_2003) &
         !is.na(ElevSlope_2022_2023) &
         ElevSlope_2002_2003 !=
@@ -588,7 +584,7 @@ message(
 compare_tbl_plot <- compare_tbl %>%
   mutate(
     ElevSlope_plot = case_when(
-      Status == "New indicator (2022–2023 only)" ~ ElevSlope_2022_2023,
+      Status == "New indicator (2023 only)" ~ ElevSlope_2022_2023,
       TRUE ~ ElevSlope_2002_2003
     )
   )
@@ -655,14 +651,14 @@ stopifnot(nrow(spp_data_all) == nrow(env_data_all))
 
 # 2️⃣ Combine environmental and species data
 dat_all <- bind_cols(
-  env_data_all[, c("period", "veg_type")],
+  env_data_all[, c("year", "veg_type")],
   spp_data_all[, 6:ncol(spp_data_all)]
 ) # assuming species start at col 7
 
 # 3️⃣ Reshape to long format
 dat_long <- dat_all %>%
   pivot_longer(
-    cols = -c(period, veg_type),
+    cols = -c(year, veg_type),
     names_to = "Species",
     values_to = "Abundance"
   ) %>%
@@ -670,17 +666,17 @@ dat_long <- dat_all %>%
 
 # 4️⃣ Summarise presence by vegetation type and year
 species_presence <- dat_long %>%
-  group_by(period, veg_type, Species) %>%
+  group_by(year, veg_type, Species) %>%
   summarise(Present = as.numeric(sum(Presence) > 0), .groups = "drop")
 
 # 5️⃣ Spread into two columns for comparison
 species_wide <- species_presence %>%
   pivot_wider(
-    names_from = period,
+    names_from = year,
     values_from = Present,
     values_fill = 0
   ) %>%
-  rename(Present_2002_2003 = `old`, Present_2022_2023 = `modern`)
+  rename(Present_2002_2003 = "2022", Present_2022_2023 = "2023")
 
 # 6️⃣ Identify species that changed vegetation type
 species_shift <- species_wide %>%
@@ -697,8 +693,8 @@ species_shift <- species_wide %>%
   ) %>%
   mutate(
     Status = case_when(
-      VegTypes_2002 == "" & VegTypes_2022 != "" ~ "New species (2022 only)",
-      VegTypes_2002 != "" & VegTypes_2022 == "" ~ "Lost species (2002 only)",
+      VegTypes_2002 == "" & VegTypes_2022 != "" ~ "New species (2023 only)",
+      VegTypes_2002 != "" & VegTypes_2022 == "" ~ "Lost species (2022 only)",
       VegTypes_2002 != VegTypes_2022 ~ "Shifted vegetation type",
       VegTypes_2002 == VegTypes_2022 ~ "Stable across vegetation types"
     )
@@ -737,7 +733,7 @@ env_data_all$Slope <- factor(env_data_all$Slope, levels = c("W", "E"))
 # 3️⃣ Combine Elevation × Slope first — clean and clear
 env_data_all <- env_data_all %>%
   mutate(ElevSlope = paste0(elevation, "_", Slope)) %>%
-  select(period, ElevSlope) # keep only what's needed for this analysis
+  select(year, ElevSlope) # keep only what's needed for this analysis
 
 # 4️⃣ Combine environmental and species data
 dat_all <- bind_cols(env_data_all, spp_data_all[, 6:ncol(spp_data_all)]) # assuming species start at col 7
@@ -745,7 +741,7 @@ dat_all <- bind_cols(env_data_all, spp_data_all[, 6:ncol(spp_data_all)]) # assum
 # 5️⃣ Reshape to long format
 dat_long <- dat_all %>%
   pivot_longer(
-    cols = -c(period, ElevSlope),
+    cols = -c(year, ElevSlope),
     names_to = "Species",
     values_to = "Abundance"
   ) %>%
@@ -753,17 +749,17 @@ dat_long <- dat_all %>%
 
 # 6️⃣ Summarise presence by Elevation × Slope and year
 species_presence <- dat_long %>%
-  group_by(period, ElevSlope, Species) %>%
+  group_by(year, ElevSlope, Species) %>%
   summarise(Present = as.numeric(sum(Presence) > 0), .groups = "drop")
 
 # 7️⃣ Spread into two columns for comparison
 species_wide <- species_presence %>%
   pivot_wider(
-    names_from = period,
+    names_from = year,
     values_from = Present,
     values_fill = 0
   ) %>%
-  rename(Present_2002_2003 = `old`, Present_2022_2023 = `modern`)
+  rename(Present_2002_2003 = "2022", Present_2022_2023 = "2023")
 
 # 8️⃣ Identify species that changed Elevation × Slope
 species_shift <- species_wide %>%
@@ -774,8 +770,8 @@ species_shift <- species_wide %>%
   ) %>%
   mutate(
     Status = case_when(
-      ElevSlope_2002 == "" & ElevSlope_2022 != "" ~ "New species (2022 only)",
-      ElevSlope_2002 != "" & ElevSlope_2022 == "" ~ "Lost species (2002 only)",
+      ElevSlope_2002 == "" & ElevSlope_2022 != "" ~ "New species (2023 only)",
+      ElevSlope_2002 != "" & ElevSlope_2022 == "" ~ "Lost species (2022 only)",
       ElevSlope_2002 != ElevSlope_2022 ~ "Shifted elevation",
       ElevSlope_2002 == ElevSlope_2022 ~ "Stable across elevations"
     )
