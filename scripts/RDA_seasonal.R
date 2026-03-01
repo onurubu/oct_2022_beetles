@@ -19,12 +19,13 @@ env_data <- env_data_all
 # ==========================================
 # Prepare species data
 # ==========================================
-spp_data <- spp_data_all[, -c(1:5)] # remove non-species columns if needed
+spp_data <- decostand(spp_data_all[, -c(1:5)], method = "hellinger")
 
 # ==========================================
 # Standardize (z-score transform)
 # ==========================================
-Zspp_data <- as.data.frame(scale(spp_data, center = TRUE, scale = TRUE))
+Zspp_data <- spp_data
+# Zspp_data <- as.data.frame(scale(spp_data, center = TRUE, scale = TRUE))
 Zenv_data <- as.data.frame(scale(
   env_data[, sapply(env_data, is.numeric)],
   center = TRUE,
@@ -62,17 +63,33 @@ fwd.sel <- ordistep(
 )
 
 fwd.sel$call
-spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
-RsquareAdj(spe.rda.signif)
 
+{
+  spe.rda.signif <- rda(
+    formula = Zspp_data ~ AMin_tair +
+      Name +
+      relhum +
+      winddir +
+      difrad +
+      # windspeed +
+      mMin_precip +
+      swdown +
+      m_precip +
+      mMin_tground,
+    data = Zenv_data
+  )
+
+  RsquareAdj(spe.rda.signif)
+}
+
+# spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
+
+RsquareAdj(model_full)
 
 summary(fwd.sel)
 summary(model_full)
 
-
 summary(spe.rda.signif)
-
-RsquareAdj(model_full)
 
 anova.cca(spe.rda.signif, step = 1000)
 anova.cca(spe.rda.signif, step = 1000, by = "term")
@@ -84,24 +101,30 @@ ef
 {
   smry <- scores(spe.rda.signif)
   df1 <- cbind(data.frame(smry$sites[, 1:2]), Zenv_data)
-  df2 <- data.frame(smry$species[, 1:2]) # loadings for PC1 and PC2
+  df2 <- data.frame(smry$species[, 1:2]) # %>%
+  # `rownames<-`(c(
+  #   "Anthia decemguttata",
+  #   "Stenocara dentata",
+  #   "Zophosis gracilicornis"
+  # ))
 
   {
-    df3 <- data.frame(smry$regression)
+    df3 <- data.frame(smry$biplot)
     df3 <- df3[!rownames(df3) %like% "Name", ]
   }
 
   {
     rda.plot <- ggplot(df1, aes(x = RDA1, y = RDA2)) +
       geom_hline(yintercept = 0, linetype = "dotted") +
-      geom_vline(xintercept = 0, linetype = "dotted")
+      geom_vline(xintercept = 0, linetype = "dotted") +
+      theme_minimal(base_size = 12)
 
     rda.biplot <- rda.plot +
       geom_point(
         data = df1,
         aes(x = RDA1, y = RDA2, shape = veg_type, col = veg_type),
-        cex = 3,
-        position = position_jitter()
+        cex = 5,
+        # position = position_dodge()
       ) +
       geom_segment(
         data = df3,
@@ -118,10 +141,45 @@ ef
           hjust = 0.5 * (1 - sign(RDA1)),
           vjust = 0.5 * (1 - sign(RDA2))
         ),
+        position = position_jitter(),
         color = "black",
-        size = 4
+        size = 6
       ) +
-      theme_minimal(base_size = 12)
+      # geom_text(
+      #   data = df2,
+      #   aes(
+      #     x = RDA1,
+      #     y = RDA2,
+      #     label = rownames(df2)
+      #   ),
+      #   color = "blue",
+      #   vjust = "inward",
+      #   hjust = "inward",
+      #   size = 5
+      # ) +
+      scale_x_continuous(limits = c(-0.9, 1)) +
+      scale_colour_discrete(
+        labels = c(
+          "Alpine",
+          "Ericaceous",
+          "Proteoid",
+          "Restioid",
+          "Strandveld",
+          "Succulent Karoo"
+        ),
+        name = "Vegetation Type"
+      ) +
+      scale_shape_discrete(
+        labels = c(
+          "Alpine",
+          "Ericaceous",
+          "Proteoid",
+          "Restioid",
+          "Strandveld",
+          "Succulent Karoo"
+        ),
+        name = "Vegetation Type"
+      )
     rda.biplot
   }
 }

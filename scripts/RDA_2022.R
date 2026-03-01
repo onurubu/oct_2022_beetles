@@ -54,29 +54,34 @@ Zenv_data <- Zenv_data %>%
 model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
 # Forward selection of variables:
+# Forward selection of variables:
+fwd.sel <- ordistep(
+  rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
+  scope = formula(model_full), # upper model limit (the "full" model)
+  direction = "forward",
+  R2scope = FALSE, # can't surpass the "full" model's R2
+  trace = FALSE
+)
+
+fwd.sel$call
+
 {
-  fwd.sel <- ordistep(
-    rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
-    scope = formula(model_full), # upper model limit (the "full" model)
-    direction = "forward",
-    R2scope = TRUE, # can't surpass the "full" model's R2
-    pstep = 1000,
-    trace = FALSE
+  spe.rda.signif <- rda(
+    formula = Zspp_data ~ Name + m_tair,
+    data = Zenv_data
   )
 
-  print(fwd.sel$call)
-  spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
   RsquareAdj(spe.rda.signif)
 }
 
+# spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
+
+RsquareAdj(model_full)
 
 summary(fwd.sel)
 summary(model_full)
 
-
 summary(spe.rda.signif)
-
-RsquareAdj(model_full)
 
 anova.cca(spe.rda.signif, step = 1000)
 anova.cca(spe.rda.signif, step = 1000, by = "term")
@@ -88,7 +93,12 @@ ef
 {
   smry <- scores(spe.rda.signif)
   df1 <- cbind(data.frame(smry$sites[, 1:2]), Zenv_data)
-  df2 <- data.frame(smry$species[, 1:2]) # loadings for PC1 and PC2
+  df2 <- data.frame(smry$species[, 1:2]) # %>%
+  # `rownames<-`(c(
+  #   "Anthia decemguttata",
+  #   "Stenocara dentata",
+  #   "Zophosis gracilicornis"
+  # ))
 
   {
     df3 <- data.frame(smry$biplot)
@@ -98,20 +108,21 @@ ef
   {
     rda.plot <- ggplot(df1, aes(x = RDA1, y = RDA2)) +
       geom_hline(yintercept = 0, linetype = "dotted") +
-      geom_vline(xintercept = 0, linetype = "dotted")
+      geom_vline(xintercept = 0, linetype = "dotted") +
+      theme_minimal(base_size = 12)
 
     rda.biplot <- rda.plot +
       geom_point(
         data = df1,
         aes(x = RDA1, y = RDA2, shape = veg_type, col = veg_type),
-        cex = 3,
-        position = position_jitter()
+        cex = 5,
+        # position = position_dodge()
       ) +
       geom_segment(
         data = df3,
         aes(x = 0, xend = RDA1, y = 0, yend = RDA2),
         color = "red",
-        arrow = arrow(length = unit(0.01, "npc"))
+        arrow = arrow(length = unit(0.02, "npc"))
       ) +
       geom_text(
         data = df3,
@@ -123,14 +134,47 @@ ef
           vjust = 0.5 * (1 - sign(RDA2))
         ),
         color = "black",
-        size = 4
+        size = 6
       ) +
-      theme_minimal(base_size = 12)
+      # geom_text(
+      #   data = df2,
+      #   aes(
+      #     x = RDA1,
+      #     y = RDA2,
+      #     label = rownames(df2)
+      #   ),
+      #   color = "blue",
+      #   vjust = "inward",
+      #   hjust = "inward",
+      #   size = 5
+      # ) +
+      scale_x_continuous(limits = c(-0.9, 1)) +
+      scale_colour_discrete(
+        labels = c(
+          "Alpine",
+          "Ericaceous",
+          "Proteoid",
+          "Restioid",
+          "Strandveld",
+          "Succulent Karoo"
+        ),
+        name = "Vegetation Type"
+      ) +
+      scale_shape_discrete(
+        labels = c(
+          "Alpine",
+          "Ericaceous",
+          "Proteoid",
+          "Restioid",
+          "Strandveld",
+          "Succulent Karoo"
+        ),
+        name = "Vegetation Type"
+      )
     rda.biplot
   }
 }
 
-Zenv_data %>% group_by(veg_type) %>% summarise(mean(area))
 
 # glm trials ####
 

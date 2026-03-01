@@ -58,9 +58,9 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 # Forward selection of variables:
 {
   fwd.sel <- ordistep(
-    rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
-    scope = formula(model_full), # upper model limit (the "full" model)
-    direction = "forward",
+    rda(formula(model_full), data = Zenv_data), # lower model limit (simple!)
+    scope = formula(Zspp_data ~ 1), # upper model limit (the "full" model)
+    direction = "backward",
     R2scope = TRUE, # can't surpass the "full" model's R2
     pstep = 1000,
     trace = FALSE
@@ -68,25 +68,27 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
   fwd.sel$call
 }
-spe.rda.signif <- rda(
-  formula = Zspp_data ~ Name +
-    period +
-    `Mg (%)` +
-    Ca +
-    mMax_tair +
-    `pH (Kcl)` +
-    veg +
-    mMax_precip +
-    windspeed,
-  data = Zenv_data
-)
-# spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
-RsquareAdj(spe.rda.signif)
 
+{
+  spe.rda.signif <- rda(
+    formula = Zspp_data ~ Name +
+      period +
+      `Mg (%)` +
+      Ca +
+      `Ca (%)` +
+      mMax_tair +
+      `pH (Kcl)` +
+      veg +
+      mMax_precip,
+    data = Zenv_data
+  )
+  # spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
+  RsquareAdj(spe.rda.signif)
+}
+RsquareAdj(model_full)
 
 summary(fwd.sel)
 summary(model_full)
-
 
 summary(spe.rda.signif)
 
@@ -102,12 +104,12 @@ ef
 {
   smry <- scores(spe.rda.signif)
   df1 <- cbind(data.frame(smry$sites[, 1:2]), Zenv_data)
-  df2 <- data.frame(smry$species[, 1:2]) %>%
-    `rownames<-`(c(
-      "Anthia decemguttata",
-      "Stenocara dentata",
-      "Zophosis gracilicornis"
-    ))
+  df2 <- data.frame(smry$species[, 1:2]) # %>%
+  # `rownames<-`(c(
+  #   "Anthia decemguttata",
+  #   "Stenocara dentata",
+  #   "Zophosis gracilicornis"
+  # ))
 
   {
     df3 <- data.frame(smry$biplot)
@@ -142,6 +144,7 @@ ef
           hjust = 0.5 * (1 - sign(RDA1)),
           vjust = 0.5 * (1 - sign(RDA2))
         ),
+        position = position_jitter(),
         color = "black",
         size = 6
       ) +
@@ -157,7 +160,7 @@ ef
         hjust = "inward",
         size = 5
       ) +
-      scale_x_continuous(limits = c(-0.6, 1.604)) +
+      scale_x_continuous(limits = c(-0.6, 1.64)) +
       scale_colour_discrete(
         labels = c(
           "Alpine",
