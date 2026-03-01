@@ -5,8 +5,6 @@
 library(vegan)
 library(grDevices)
 
-# setwd("~/Documents/Analysis/PhD RDA data")
-
 # ==========================================
 # Import data
 # ==========================================
@@ -18,34 +16,16 @@ spp_data_all <- abund_all
 # ==========================================
 env_data <- env_data_all
 
-# # Keep categorical columns as factors
-# env_data$Season <- as.factor(env_data$Season)
-# env_data$Sampling_event <- as.factor(env_data$Sampling_event)
-# env_data$Slope <- as.factor(env_data$Slope)
-# env_data$Site <- as.factor(env_data$Site)
-# env_data$Replicate <- as.factor(env_data$Replicate)
-
-# Convert all other columns to numeric (including Fire)
-# numeric_cols <- setdiff(
-#   names(env_data),
-#   c("Season", "Vegetation_type", "Sampling_event", "Site", "Replicate")
-# )
-# env_data[numeric_cols] <- lapply(env_data[numeric_cols], function(x) {
-#   as.numeric(gsub(",", ".", x))
-# })
-
-# Check structure to confirm
-# str(env_data)
-
 # ==========================================
 # Prepare species data
 # ==========================================
-spp_data <- spp_data_all[, -c(1:5)] # remove non-species columns if needed
+spp_data <- decostand(spp_data_all[, -c(1:5)], method = "hellinger") # remove non-species columns if needed
 
 # ==========================================
 # Standardize (z-score transform)
 # ==========================================
-Zspp_data <- as.data.frame(scale(spp_data, center = TRUE, scale = TRUE))
+Zspp_data <- spp_data
+# Zspp_data <- as.data.frame(scale(spp_data, center = TRUE, scale = TRUE))
 Zenv_data <- as.data.frame(scale(
   env_data[, sapply(env_data, is.numeric)],
   center = TRUE,
@@ -73,24 +53,34 @@ Zenv_data <- Zenv_data %>%
   ) %>%
   select(-AMin_precip)
 
-# Coskun trials ####
-
-# cef <- envfit(tbRDA3, Zenv_data)
-# cef #Keep significant or very important variables
 model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
 # Forward selection of variables:
-fwd.sel <- ordistep(
-  rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
-  scope = formula(model_full), # upper model limit (the "full" model)
-  direction = "forward",
-  R2scope = TRUE, # can't surpass the "full" model's R2
-  steps = 1000,
-  trace = FALSE
-)
+{
+  fwd.sel <- ordistep(
+    rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
+    scope = formula(model_full), # upper model limit (the "full" model)
+    direction = "forward",
+    R2scope = TRUE, # can't surpass the "full" model's R2
+    pstep = 1000,
+    trace = FALSE
+  )
 
-fwd.sel$call
-spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
+  fwd.sel$call
+}
+spe.rda.signif <- rda(
+  formula = Zspp_data ~ Name +
+    period +
+    `Mg (%)` +
+    Ca +
+    mMax_tair +
+    `pH (Kcl)` +
+    veg +
+    mMax_precip +
+    windspeed,
+  data = Zenv_data
+)
+# spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
 RsquareAdj(spe.rda.signif)
 
 
@@ -107,28 +97,17 @@ anova.cca(spe.rda.signif, step = 1000, by = "term")
 anova.cca(spe.rda.signif, step = 1000, by = "axis")
 
 ef <- envfit(spe.rda.signif, Zenv_data, choices = c(1, 2))
-ef #Keep significant or very important variables
-
-# ordiplot(spe.rda.signif, scaling = 1, type = "text")
-
-# plot(
-#   spe.rda.signif,
-#   display = "bp",
-# ) #Show sites and species + env. variables
-# # text(spe.rda.signif, "sites", col = "black", cex = 0.8) #Show sites names
-# # ordihull(spe.rda.signif, group = spp_data_all$period, label = TRUE, ) #Link sites with polygones representing groups
-# text(spe.rda.signif, "species", col = "red", cex = 0.8) #Show species names
-# text(spe.rda.signif, "species", col = "red", cex = 0.8) #Show species names
-# # points(spe.rda.signif, display = "sites") #Add points for sites
-# points(spe.rda.signif, display = "species", pch = "+")
-# x <- scores(spe.rda.signif)
-# anova(spe.rda.signif, by = "axis", perm.max = 500) #Test significance of axis
-# anova(spe.rda.signif) #Test significance of RDA
+ef
 
 {
   smry <- scores(spe.rda.signif)
   df1 <- cbind(data.frame(smry$sites[, 1:2]), Zenv_data)
-  df2 <- data.frame(smry$species[, 1:2]) # loadings for PC1 and PC2
+  df2 <- data.frame(smry$species[, 1:2]) %>%
+    `rownames<-`(c(
+      "Anthia decemguttata",
+      "Stenocara dentata",
+      "Zophosis gracilicornis"
+    ))
 
   {
     df3 <- data.frame(smry$biplot)
@@ -136,11 +115,18 @@ ef #Keep significant or very important variables
   }
 
   {
-    rda.plot <- ggplot(df1, aes(x = RDA1, y = RDA2)) #+
-    # geom_hline(yintercept = 0, linetype = "dotted") +
-    # geom_vline(xintercept = 0, linetype = "dotted")
+    rda.plot <- ggplot(df1, aes(x = RDA1, y = RDA2)) +
+      geom_hline(yintercept = 0, linetype = "dotted") +
+      geom_vline(xintercept = 0, linetype = "dotted") +
+      theme_minimal(base_size = 12)
 
     rda.biplot <- rda.plot +
+      geom_point(
+        data = df1,
+        aes(x = RDA1, y = RDA2, shape = veg_type, col = veg_type),
+        cex = 5,
+        # position = position_dodge()
+      ) +
       geom_segment(
         data = df3,
         aes(x = 0, xend = RDA1, y = 0, yend = RDA2),
@@ -156,32 +142,48 @@ ef #Keep significant or very important variables
           hjust = 0.5 * (1 - sign(RDA1)),
           vjust = 0.5 * (1 - sign(RDA2))
         ),
-        color = "red",
-        size = 4
-      ) +
-      # scale_x_continuous(limits = c(-1.1, 2.1)) +
-      geom_point(
-        data = df1,
-        aes(x = RDA1, y = RDA2, shape = veg_type, col = veg_type),
-        cex = 3,
-        position = position_jitter()
+        color = "black",
+        size = 6
       ) +
       geom_text(
         data = df2,
         aes(
           x = RDA1,
           y = RDA2,
-          label = rownames(df2),
-          hjust = 0.5 * (1 - sign(RDA1)),
-          vjust = 0.5 * (1 - sign(RDA2))
+          label = rownames(df2)
         ),
         color = "blue",
-        size = 4
+        vjust = "inward",
+        hjust = "inward",
+        size = 5
+      ) +
+      scale_x_continuous(limits = c(-0.6, 1.604)) +
+      scale_colour_discrete(
+        labels = c(
+          "Alpine",
+          "Ericaceous",
+          "Proteoid",
+          "Restioid",
+          "Strandveld",
+          "Succulent Karoo"
+        ),
+        name = "Vegetation Type"
+      ) +
+      scale_shape_discrete(
+        labels = c(
+          "Alpine",
+          "Ericaceous",
+          "Proteoid",
+          "Restioid",
+          "Strandveld",
+          "Succulent Karoo"
+        ),
+        name = "Vegetation Type"
       )
-
     rda.biplot
   }
 }
+
 
 # glm trials ####
 
@@ -198,104 +200,21 @@ hist_full <- full_join(abund_all, env_all) %>%
 glm_env_period <- hist_full %>%
   MCMCglmm(
     data = .,
-    fixed = abundance ~ (AMin_tground +
+    fixed = abundance ~ (site +
+      AMin_tground +
+      d_fire +
       `C (%)` +
       `H+ (cmol/Kg)` +
       mMax_tair +
       `NO3 (mg/kg)` +
-      Mg) *
+      Mg +
+      pres +
+      rock_soil) *
       period,
     random = ~site,
     family = "poisson"
   )
 summary(glm_env_period)
-
-####PLOTS####
-#Plot results "tbRDA1" = selected variables + all significant and almost significant variables
-#X11()
-plot(
-  tbRDA1,
-  pch = as.character(Zenv_data$Name),
-  col = 1:6,
-) #Show sites and species + env. variables
-# text(tbRDA1, "sites", col="black", cex=0.8) #Show sites names
-ordihull(tbRDA1, group = spp_data_all$period, label = TRUE, ) #Link sites with polygones representing groups
-text(tbRDA1, "species", col = "red", cex = 0.8) #Show species names
-# points(tbRDA1, display = "sites") #Add points for sites
-# points(tbRDA1, display = "species", pch = "+")
-anova(tbRDA1, by = "axis", perm.max = 500) #Test significance of axis
-anova(tbRDA1) #Test significance of RDA
-
-#Plot results "tbRDA2" = all significant and almost significant variables
-plot(
-  tbRDA2,
-  pch = as.character(Zenv_data$Name),
-  col = "black",
-) # affichage de tes sites et de tes especes (pas les noms, juste leurs points) + variables enviro
-ordihull(tbRDA2, group = spp_data_all$period, label = TRUE) #Link sites with polygones
-text(tbRDA2, "species", col = "red", cex = 0.8) #Show species names
-#points(tbRDA2, display = "sites") #Add points for sites
-# points(tbRDA2, display = "species", pch = "+")
-anova(tbRDA2, by = "axis", perm.max = 500) #Test significance of axis
-anova(tbRDA2) #Test significance of RDA
-
-#Plot results "tbRDA3" = only significant variables
-plot(
-  tbRDA3,
-  pch = as.character(Zenv_data$Name),
-  col = "black",
-) # affichage de tes sites et de tes especes (pas les noms, juste leurs points) + variables enviro
-ordihull(tbRDA3, group = spp_data_all$period, label = TRUE) #Link sites with polygones
-text(tbRDA3, "species", col = "red", cex = 0.8) #Show species names
-#points(tbRDA3, display = "sites") #Add points for sites
-#points(tbRDA3, display = "species", pch = "+")
-anova(tbRDA3, by = "axis", perm.max = 500) #Test significance of axis
-anova(tbRDA3) #Test significance of RDA
-
-
-##Last test - all significant variables + sites as a condition - tbRDA4
-tbRDA4 = rda(
-  Zspp_data ~ bare_ground +
-    litter +
-    rock +
-    veg +
-    rock_soil +
-    clay +
-    sand +
-    silt +
-    `NO3(mg/kg)` +
-    `C(%)` +
-    maxhgt +
-    m_tground +
-    mMax_tground +
-    mMin_tground +
-    AMax_tground +
-    AMin_tground +
-    range_tground +
-    m_tair +
-    mMax_tair +
-    mMin_tair +
-    AMin_tair +
-    m_precip +
-    mMax_precip +
-    mMin_precip +
-    AMax_precip +
-    range_precip +
-    elevation +
-    slope +
-    Name,
-  data = Zenv_data
-)
-summary(tbRDA4)
-
-plot(
-  tbRDA4,
-  pch = as.character(Zenv_data$Name),
-  col = "black",
-)
-ordihull(tbRDA4, group = spp_data_all$period, label = TRUE)
-anova(tbRDA4, by = "axis", perm.max = 500)
-anova(tbRDA4)
 
 
 ##############################################
