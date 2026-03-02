@@ -3078,3 +3078,152 @@ beet_wide_results %>%
   group_by(year) %>%
   mutate(abund = rowSums(across(where(is.numeric)))) %>%
   select(year, abund)
+
+# beetle tables ###
+
+# historical ##
+
+hist_abund_table_anthia <- abund_all %>%
+  group_by(year, site) %>%
+  summarise(
+    `sd` = sd(anthia_decemguttata),
+    anthia_decemguttata = sum(anthia_decemguttata),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(names_from = c(year), values_from = c(anthia_decemguttata, `sd`))
+
+hist_abund_table_stenocara <- abund_all %>%
+  group_by(year, site) %>%
+  summarise(
+    `sd` = sd(stenocara_dentata),
+    stenocara_dentata = sum(stenocara_dentata),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(names_from = c(year), values_from = c(stenocara_dentata, `sd`))
+
+hist_abund_table_zophosis <- abund_all %>%
+  group_by(year, site) %>%
+  summarise(
+    `sd` = sd(zophosis_gracilicornis),
+    zophosis_gracilicornis = sum(zophosis_gracilicornis),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(
+    names_from = c(year),
+    values_from = c(zophosis_gracilicornis, `sd`)
+  )
+
+hist_abund_table_all <- abund_all %>%
+  group_by(year, site) %>%
+  mutate(
+    abund = as.integer(rowSums(across(c(
+      anthia_decemguttata,
+      stenocara_dentata,
+      zophosis_gracilicornis
+    ))))
+  ) %>%
+  summarise(
+    abundance = mean(abund),
+    s_d = plotrix::std.error(abund),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    elevation = as.factor(alt_labels[site]),
+    abundance_sd = paste(abundance, "±", signif(s_d, digits = 3))
+  ) %>%
+  select(year, elevation, abundance_sd) %>%
+  pivot_wider(
+    id_cols = c(elevation),
+    names_from = c(year),
+    values_from = c(abundance_sd),
+    values_fn = list
+  ) %>%
+  unnest(cols = c(`2002`, `2003`, `2022`, `2023`))
+
+# modern ##
+# elevation
+{
+  modern_species_richness <- beet_wide %>%
+    filter(year == 2022) %>%
+    group_by(site, replicate) %>%
+    summarise(
+      across(where(is.numeric), sum),
+      .groups = "drop"
+    )
+  modern_species_richness <- modern_species_richness %>%
+    mutate(richness = specnumber(modern_species_richness[, -(1:2)])) %>%
+    select(1:2, richness)
+  modern_species_abund <- beet_wide %>%
+    select(-ID) %>%
+    mutate(abundance = rowSums(across(where(is.numeric)))) %>%
+    group_by(site, replicate) %>%
+    summarise(abundance = sum(abundance), .groups = "drop")
+  modern_species_div <- modern_species_richness %>%
+    mutate(abundance = modern_species_abund$abundance) %>%
+    relocate(site, replicate)
+  modern_sp_abund_table_all <- modern_species_div %>%
+    group_by(site) %>%
+    summarise(
+      abund = mean(abundance),
+      s_d_abund = plotrix::std.error(abundance),
+      rchnss = mean(richness),
+      s_d_rchnss = plotrix::std.error(richness),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      elevation = as.factor(alt_labels[site]),
+      abundance_sd = paste(abund, "±", signif(s_d_abund, digits = 3)),
+      rchnss_sd = paste(rchnss, "±", signif(s_d_rchnss, digits = 3))
+    ) %>%
+    select(elevation, abundance_sd, rchnss_sd)
+  rm(modern_species_abund, modern_species_richness, modern_species_div)
+}
+
+# vegetation type #
+# modern ##
+
+{
+  modern_species_richness <- beet_wide %>%
+    filter(year == 2022) %>%
+    group_by(site, replicate) %>%
+    summarise(
+      across(where(is.numeric), sum),
+      .groups = "drop"
+    )
+  modern_species_richness <- modern_species_richness %>%
+    mutate(richness = specnumber(modern_species_richness[, -(1:2)])) %>%
+    select(1:2, richness)
+  modern_species_abund <- beet_wide %>%
+    select(-ID) %>%
+    mutate(abundance = rowSums(across(where(is.numeric)))) %>%
+    group_by(site, replicate) %>%
+    summarise(abundance = sum(abundance), .groups = "drop")
+  modern_species_div <- modern_species_richness %>%
+    mutate(abundance = modern_species_abund$abundance) %>%
+    relocate(site, replicate)
+  modern_sp_abund_table_veg <- modern_species_div %>%
+    mutate(
+      veg_type = factor(case_when(
+        site %in% c(1) ~ "strandveld",
+        site %in% c(2, 6, 16) ~ "restioid",
+        site %in% c(3, 4, 5) ~ "proteoid",
+        site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+        site %in% c(11) ~ "alpine",
+        site %in% c(17) ~ "succulent_karoo"
+      ))
+    ) %>%
+    group_by(veg_type) %>%
+    summarise(
+      abund = mean(abundance),
+      s_d_abund = plotrix::std.error(abundance),
+      rchnss = mean(richness),
+      s_d_rchnss = plotrix::std.error(richness),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      abundance_sd = paste(abund, "±", signif(s_d_abund, digits = 3)),
+      rchnss_sd = paste(rchnss, "±", signif(s_d_rchnss, digits = 3))
+    ) %>%
+    select(veg_type, abundance_sd, rchnss_sd)
+  rm(modern_species_abund, modern_species_richness, modern_species_div)
+}

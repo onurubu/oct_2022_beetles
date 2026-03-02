@@ -842,21 +842,3 @@ summary(model_maxhgt_period_sites)
     )
   }
 }
-
-### other trials ####
-# fire_data <- readRDS("./fire_data/fire_history.rds") %>%
-#   select(-fire_years)
-# fire_data <- fire_data %>%
-#   mutate(
-#     d_fire = case_when(d_fire >= 43 ~ d_fire + 11, d_fire < 43 ~ d_fire)
-#   )
-
-# xxx <- fire_data %>%
-#   filter(d_fire < 43)
-
-# yyy <- left_join(xxx, veg_height_comp)
-# yyy <- left_join(yyy, veg_cover_comp)
-
-# m1 <- lm(tothits ~ d_fire * site, data = yyy)
-# summary(m1)
-# rm(m1, xxx, yyy)
