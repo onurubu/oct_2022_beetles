@@ -19,7 +19,7 @@ env_data <- env_data_all
 # ==========================================
 # Prepare species data
 # ==========================================
-spp_data <- decostand(spp_data_all[, -c(1:5)], method = "hellinger") # remove non-species columns if needed
+spp_data <- decostand(spp_data_all[, -c(1:5)], method = "hellinger")
 
 # ==========================================
 # Standardize (z-score transform)
@@ -158,7 +158,7 @@ ef
         color = "blue",
         vjust = "inward",
         hjust = "inward",
-        size = 5
+        size = 7
       ) +
       scale_x_continuous(limits = c(-0.6, 1.64)) +
       scale_colour_discrete(

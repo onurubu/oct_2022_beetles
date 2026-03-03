@@ -67,7 +67,7 @@ fwd.sel$call
 
 {
   spe.rda.signif <- rda(
-    formula = Zspp_data ~ Name + m_tair,
+    formula = Zspp_data ~ Name + m_tair + relhum + swdown + m_precip,
     data = Zenv_data
   )
 

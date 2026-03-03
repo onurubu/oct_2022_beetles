@@ -176,36 +176,37 @@ ef
 }
 
 
-# glm trials ####
+glm
+trials ####
 
-# hist_full <- full_join(abund_all, env_all) %>%
-#   mutate(slope = Zenv_data$slope) %>%
-#   mutate(
-#     abundance = rowSums(across(c(
-#       anthia_decemguttata,
-#       stenocara_dentata,
-#       zophosis_gracilicornis
-#     )))
-#   )
+hist_full <- full_join(abund_all, env_all) %>%
+  mutate(slope = Zenv_data$slope) %>%
+  mutate(
+    abundance = rowSums(across(c(
+      anthia_decemguttata,
+      stenocara_dentata,
+      zophosis_gracilicornis
+    )))
+  )
 
-# glm_env_period <- hist_full %>%
-#   MCMCglmm(
-#     data = .,
-#     fixed = abundance ~ (site +
-#       AMin_tground +
-#       d_fire +
-#       `C (%)` +
-#       `H+ (cmol/Kg)` +
-#       mMax_tair +
-#       `NO3 (mg/kg)` +
-#       Mg +
-#       pres +
-#       rock_soil) *
-#       period,
-#     random = ~site,
-#     family = "poisson"
-#   )
-# summary(glm_env_period)
+glm_env_period <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = abundance ~ (site +
+      AMin_tground +
+      d_fire +
+      `C (%)` +
+      `H+ (cmol/Kg)` +
+      mMax_tair +
+      `NO3 (mg/kg)` +
+      Mg +
+      pres +
+      rock_soil) *
+      period,
+    random = ~site,
+    family = "poisson"
+  )
+summary(glm_env_period)
 
 ##############################################
 # Indicator Species Analysis by Vegetation Type
