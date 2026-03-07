@@ -1598,851 +1598,850 @@ for (k in 1:17) {
 
 # werner ID MDS family ####
 
-{
-  fam_carabid_modern <- data.table::fread(
-    "./family_groups/carabids_modern.csv"
-  ) %>%
-    mutate(across(c(site, replicate, year), factor))
+# {
+#   fam_carabid_modern <- data.table::fread(
+#     "./working_beetle_data/family_groups/carabid_modern.csv"
+#   ) %>%
+#     mutate(across(c(site, replicate, year), factor))
 
-  fam_tenebrionid_modern <- data.table::fread(
-    "./family_groups/tenebrionids_modern.csv"
-  ) %>%
-    mutate(across(c(site, replicate, year), factor))
+#   fam_tenebrionid_modern <- data.table::fread(
+#     "./working_beetle_data/family_groups/tenebrionid_modern.csv"
+#   ) %>%
+#     mutate(across(c(site, replicate, year), factor))
 
-  fam_cicindelid_modern <- data.table::fread(
-    "./family_groups/cicindelids_modern.csv"
-  ) %>%
-    mutate(across(c(site, replicate, year), factor))
+#   fam_cicindelid_modern <- data.table::fread(
+#     "./working_beetle_data/family_groups/cicindelid_modern.csv"
+#   ) %>%
+#     mutate(across(c(site, replicate, year), factor))
 
-  {
-    fam_carabid_modern_sums <- fam_carabid_modern %>%
-      mutate("carabids" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, carabids)
-    fam_carabid_old_sums <- fam_carabid_old %>%
-      mutate("carabids" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, carabids)
-    fam_carabid_sums <- rbind(fam_carabid_old_sums, fam_carabid_modern_sums)
-    rm(fam_carabid_modern_sums, fam_carabid_old_sums)
+#   {
+#     fam_carabid_modern_sums <- fam_carabid_modern %>%
+#       mutate("carabids" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, carabids)
+#     fam_carabid_old_sums <- fam_carabid_old %>%
+#       mutate("carabids" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, carabids)
+#     fam_carabid_sums <- rbind(fam_carabid_old_sums, fam_carabid_modern_sums)
+#     rm(fam_carabid_modern_sums, fam_carabid_old_sums)
 
-    fam_tenebrionid_modern_sums <- fam_tenebrionid_modern %>%
-      mutate("tenebrionids" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, tenebrionids)
-    fam_tenebrionid_old_sums <- fam_tenebrionid_old %>%
-      mutate("tenebrionids" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, tenebrionids)
-    fam_tenebrionid_sums <- rbind(
-      fam_tenebrionid_old_sums,
-      fam_tenebrionid_modern_sums
-    )
-    rm(fam_tenebrionid_modern_sums, fam_tenebrionid_old_sums)
+#     fam_tenebrionid_modern_sums <- fam_tenebrionid_modern %>%
+#       mutate("tenebrionids" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, tenebrionids)
+#     fam_tenebrionid_old_sums <- fam_tenebrionid_old %>%
+#       mutate("tenebrionids" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, tenebrionids)
+#     fam_tenebrionid_sums <- rbind(
+#       fam_tenebrionid_old_sums,
+#       fam_tenebrionid_modern_sums
+#     )
+#     rm(fam_tenebrionid_modern_sums, fam_tenebrionid_old_sums)
 
-    fam_cicindelid_modern_sums <- fam_cicindelid_modern %>%
-      mutate("cicindelids" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, cicindelids)
-    fam_cicindelid_old_sums <- fam_cicindelid_old %>%
-      mutate("cicindelids" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, cicindelids)
-    fam_cicindelid_sums <- rbind(
-      fam_cicindelid_old_sums,
-      fam_cicindelid_modern_sums
-    )
-    rm(fam_cicindelid_modern_sums, fam_cicindelid_old_sums)
+#     fam_cicindelid_modern_sums <- fam_cicindelid_modern %>%
+#       mutate("cicindelids" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, cicindelids)
+#     fam_cicindelid_old_sums <- fam_cicindelid_old %>%
+#       mutate("cicindelids" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, cicindelids)
+#     fam_cicindelid_sums <- rbind(
+#       fam_cicindelid_old_sums,
+#       fam_cicindelid_modern_sums
+#     )
+#     rm(fam_cicindelid_modern_sums, fam_cicindelid_old_sums)
 
-    fam_sums <- inner_join(
-      fam_carabid_sums,
-      fam_cicindelid_sums,
-      by = c("site", "replicate", "year")
-    )
-    fam_sums <- inner_join(
-      fam_sums,
-      fam_tenebrionid_sums,
-      by = c("site", "replicate", "year")
-    )
-    rm(fam_cicindelid_sums, fam_carabid_sums, fam_tenebrionid_sums)
-  }
+#     fam_sums <- inner_join(
+#       fam_carabid_sums,
+#       fam_cicindelid_sums,
+#       by = c("site", "replicate", "year")
+#     )
+#     fam_sums <- inner_join(
+#       fam_sums,
+#       fam_tenebrionid_sums,
+#       by = c("site", "replicate", "year")
+#     )
+#     rm(fam_cicindelid_sums, fam_carabid_sums, fam_tenebrionid_sums)
+#   }
 
-  {
-    x1 <- fam_carabid_modern %>%
-      mutate(decostand(across(where(is.numeric)), "pa")) %>%
-      mutate("carabid_diversity" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, carabid_diversity)
-    x2 <- fam_carabid_old %>%
-      mutate(decostand(across(where(is.numeric)), "pa")) %>%
-      mutate("carabid_diversity" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, carabid_diversity)
-    x <- rbind(x2, x1)
+#   {
+#     x1 <- fam_carabid_modern %>%
+#       mutate(decostand(across(where(is.numeric)), "pa")) %>%
+#       mutate("carabid_diversity" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, carabid_diversity)
+#     x2 <- fam_carabid_old %>%
+#       mutate(decostand(across(where(is.numeric)), "pa")) %>%
+#       mutate("carabid_diversity" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, carabid_diversity)
+#     x <- rbind(x2, x1)
 
-    y1 <- fam_cicindelid_modern %>%
-      mutate(decostand(across(where(is.numeric)), "pa")) %>%
-      mutate("cicindelid_diversity" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, cicindelid_diversity)
-    y2 <- fam_cicindelid_old %>%
-      mutate(decostand(across(where(is.numeric)), "pa")) %>%
-      mutate("cicindelid_diversity" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, cicindelid_diversity)
-    y <- rbind(y2, y1)
+#     y1 <- fam_cicindelid_modern %>%
+#       mutate(decostand(across(where(is.numeric)), "pa")) %>%
+#       mutate("cicindelid_diversity" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, cicindelid_diversity)
+#     y2 <- fam_cicindelid_old %>%
+#       mutate(decostand(across(where(is.numeric)), "pa")) %>%
+#       mutate("cicindelid_diversity" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, cicindelid_diversity)
+#     y <- rbind(y2, y1)
 
-    z1 <- fam_tenebrionid_modern %>%
-      mutate(decostand(across(where(is.numeric)), "pa")) %>%
-      mutate("tenebrionid_diversity" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, tenebrionid_diversity)
-    z2 <- fam_tenebrionid_old %>%
-      mutate(decostand(across(where(is.numeric)), "pa")) %>%
-      mutate("tenebrionid_diversity" = rowSums(across(where(is.numeric)))) %>%
-      select(site, replicate, year, tenebrionid_diversity)
-    z <- rbind(z2, z1)
+#     z1 <- fam_tenebrionid_modern %>%
+#       mutate(decostand(across(where(is.numeric)), "pa")) %>%
+#       mutate("tenebrionid_diversity" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, tenebrionid_diversity)
+#     z2 <- fam_tenebrionid_old %>%
+#       mutate(decostand(across(where(is.numeric)), "pa")) %>%
+#       mutate("tenebrionid_diversity" = rowSums(across(where(is.numeric)))) %>%
+#       select(site, replicate, year, tenebrionid_diversity)
+#     z <- rbind(z2, z1)
 
-    fam_presence <- inner_join(x, z, by = c("site", "replicate", "year"))
-    fam_presence <- inner_join(
-      fam_presence,
-      y,
-      by = c("site", "replicate", "year")
-    )
+#     fam_presence <- inner_join(x, z, by = c("site", "replicate", "year"))
+#     fam_presence <- inner_join(
+#       fam_presence,
+#       y,
+#       by = c("site", "replicate", "year")
+#     )
 
-    rm(x1, x2, x, y1, y2, y, z1, z2, z)
-  }
+#     rm(x1, x2, x, y1, y2, y, z1, z2, z)
+#   }
 
-  fam_sums <- fam_sums %>%
-    mutate(
-      period = factor(case_when(
-        year %in% c(2002, 2003) ~ "old",
-        year %in% c(2022, 2023) ~ "modern"
-      ))
-    ) %>%
-    relocate(site, replicate, year, period)
+#   fam_sums <- fam_sums %>%
+#     mutate(
+#       period = factor(case_when(
+#         year %in% c(2002, 2003) ~ "old",
+#         year %in% c(2022, 2023) ~ "modern"
+#       ))
+#     ) %>%
+#     relocate(site, replicate, year, period)
 
-  fam_presence <- fam_presence %>%
-    mutate(
-      period = factor(case_when(
-        year %in% c(2002, 2003) ~ "old",
-        year %in% c(2022, 2023) ~ "modern"
-      ))
-    ) %>%
-    relocate(site, replicate, year, period)
+#   fam_presence <- fam_presence %>%
+#     mutate(
+#       period = factor(case_when(
+#         year %in% c(2002, 2003) ~ "old",
+#         year %in% c(2022, 2023) ~ "modern"
+#       ))
+#     ) %>%
+#     relocate(site, replicate, year, period)
 
-  rm(
-    fam_carabid_modern,
-    fam_carabid_old,
-    fam_cicindelid_modern,
-    fam_cicindelid_old,
-    fam_tenebrionid_modern,
-    fam_tenebrionid_old
-  )
-}
+#   rm(
+#     fam_carabid_modern,
+#     fam_carabid_old,
+#     fam_cicindelid_modern,
+#     fam_cicindelid_old,
+#     fam_tenebrionid_modern,
+#     fam_tenebrionid_old
+#   )
+# }
 
-# mds trials ###
+# # mds trials ###
 
-# presence-absence ##
-# all sites #
+# # presence-absence ##
+# # all sites #
 
-{
-  fam_presence_values <- fam_presence[, 5:7] %>%
-    mutate(decostand(across(where(is.numeric)), "pa")) %>%
-    filter(rowSums(across(where(is.numeric))) != 0)
-  fam_presence_cats <- fam_presence %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(1:4)
-  Herb_community.mds <- fam_presence_values %>%
-    metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
-  MDS_xy <- data.frame(Herb_community.mds$points)
-  MDS_xy$site <- fam_presence_cats$site
-  MDS_xy$replicate <- fam_presence_cats$replicate
-  MDS_xy$year <- fam_presence_cats$year
-  MDS_xy$period <- fam_presence_cats$period
-  Herb_community.mds$stress
+# {
+#   fam_presence_values <- fam_presence[, 5:7] %>%
+#     mutate(decostand(across(where(is.numeric)), "pa")) %>%
+#     filter(rowSums(across(where(is.numeric))) != 0)
+#   fam_presence_cats <- fam_presence %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(1:4)
+#   Herb_community.mds <- fam_presence_values %>%
+#     metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
+#   MDS_xy <- data.frame(Herb_community.mds$points)
+#   MDS_xy$site <- fam_presence_cats$site
+#   MDS_xy$replicate <- fam_presence_cats$replicate
+#   MDS_xy$year <- fam_presence_cats$year
+#   MDS_xy$period <- fam_presence_cats$period
+#   Herb_community.mds$stress
 
-  p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_point() +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle("Family presence by year") +
-    scale_color_discrete(name = "Year")
-  p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    geom_point() +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle("Family presence by sampling period") +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    )
-  p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family presence by year with sites, overlaps jittered") +
-    scale_color_discrete(
-      name = "Year",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    ggrepel::geom_text_repel(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE,
-      max.overlaps = 1000
-    )
-  p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family presence by year with sites") +
-    scale_color_discrete(
-      name = "Year",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    geom_text(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE
-    )
-  p5 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family presence by sampling period") +
-    stat_ellipse() +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023"),
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    geom_text(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE
-    )
-  p6 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = site)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family presence by site") +
-    scale_color_discrete(
-      name = "Site",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    ggrepel::geom_text_repel(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE,
-      max.overlaps = 1000
-    )
-}
+#   p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     geom_point() +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle("Family presence by year") +
+#     scale_color_discrete(name = "Year")
+#   p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     geom_point() +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle("Family presence by sampling period") +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023")
+#     )
+#   p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family presence by year with sites, overlaps jittered") +
+#     scale_color_discrete(
+#       name = "Year",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     ggrepel::geom_text_repel(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE,
+#       max.overlaps = 1000
+#     )
+#   p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family presence by year with sites") +
+#     scale_color_discrete(
+#       name = "Year",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     geom_text(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE
+#     )
+#   p5 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family presence by sampling period") +
+#     stat_ellipse() +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023"),
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     geom_text(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE
+#     )
+#   p6 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = site)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family presence by site") +
+#     scale_color_discrete(
+#       name = "Site",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     ggrepel::geom_text_repel(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE,
+#       max.overlaps = 1000
+#     )
+# }
 
-{
-  ggsave(
-    "./MDS_plots/family_grouped/presence_absence/year_all.png",
-    plot = p1,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/presence_absence/period_all.png",
-    plot = p2,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/presence_absence/year_all_sites_jitter.png",
-    plot = p3,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/presence_absence/year_all_sites.png",
-    plot = p4,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/presence_absence/period_all_sites.png",
-    plot = p5,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/presence_absence/sites_jitter.png",
-    plot = p6,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
+# {
+#   ggsave(
+#     "./MDS_plots/family_grouped/presence_absence/year_all.png",
+#     plot = p1,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/presence_absence/period_all.png",
+#     plot = p2,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/presence_absence/year_all_sites_jitter.png",
+#     plot = p3,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/presence_absence/year_all_sites.png",
+#     plot = p4,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/presence_absence/period_all_sites.png",
+#     plot = p5,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/presence_absence/sites_jitter.png",
+#     plot = p6,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
 
-  rm(
-    fam_presence_values,
-    fam_presence_cats,
-    Herb_community.mds,
-    MDS_xy,
-    p1,
-    p2,
-    p3,
-    p4,
-    p5,
-    p6
-  )
-}
-
-dist <- vegdist(fam_presence_values, method = "bray")
-anosim_type <- anosim(dist, fam_presence_cats$site)
-summary(anosim_type)
-
-# site-specific #
-
-for (k in 1:17) {
-  x <- fam_presence %>%
-    filter(site == k) %>%
-    mutate(decostand(across(where(is.numeric)), "pa"))
-  fam_presence_values <- x %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(5:7)
-  fam_presence_cats <- x %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(1:4)
-  Herb_community.mds <- fam_presence_values %>%
-    metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
-  MDS_xy <- data.frame(Herb_community.mds$points)
-  MDS_xy$site <- fam_presence_cats$site
-  MDS_xy$replicate <- fam_presence_cats$replicate
-  MDS_xy$year <- fam_presence_cats$year
-  MDS_xy$period <- fam_presence_cats$period
-  Herb_community.mds$stress
-
-  pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_jitter() +
-    theme_bw() +
-    ggtitle(paste0("Site ", k, ", family presence by year")) +
-    scale_color_discrete(name = "Year")
-  (pb <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    geom_jitter(width = 0.02, height = 0.02) +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle(paste0("Site ", k, ", family presence by sampling period")) +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    ))
-
-  ggsave(
-    paste0("./MDS_plots/family_grouped/presence_absence/year/site_", k, ".png"),
-    plot = pa,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
-  ggsave(
-    paste0(
-      "./MDS_plots/family_grouped/presence_absence/period/site_",
-      k,
-      ".png"
-    ),
-    plot = pb,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
-
-  {
-    if (k == 17) {
-      rm(
-        k,
-        x,
-        fam_presence_values,
-        fam_presence_cats,
-        Herb_community.mds,
-        MDS_xy,
-        pa,
-        pb
-      )
-    }
-  }
-}
-
-# random
-
-MDS_xy %>%
-  filter(year == "2022") %>%
-  ggplot(., aes(MDS1, MDS2, color = site)) +
-  theme_bw() +
-  geom_point(alpha = 0) +
-  ggtitle("Family presence by site") +
-  scale_color_discrete(
-    name = "Year",
-    guide = guide_legend(override.aes = list(alpha = 1))
-  ) +
-  geom_text(
-    data = MDS_xy,
-    mapping = aes(MDS1, MDS2, label = site),
-    show.legend = FALSE,
-    max.overlaps = 1000
-  ) +
-  stat_ellipse()
-
-
-# diversity ##
-# all sites #
-
-{
-  fam_presence_values <- fam_presence[, 5:7] %>%
-    filter(rowSums(across(where(is.numeric))) != 0)
-  fam_presence_cats <- fam_presence %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(1:4)
-  Herb_community.mds <- fam_presence_values %>%
-    metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
-  MDS_xy <- data.frame(Herb_community.mds$points)
-  MDS_xy$site <- fam_presence_cats$site
-  MDS_xy$replicate <- fam_presence_cats$replicate
-  MDS_xy$year <- fam_presence_cats$year
-  MDS_xy$period <- fam_presence_cats$period
-  Herb_community.mds$stress
-
-  p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_point() +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle("Family diversity by year") +
-    scale_color_discrete(name = "Year")
-  p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    geom_point() +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle("Family diversity by sampling period") +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    )
-  p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family diversity by year with sites, overlaps jittered") +
-    scale_color_discrete(
-      name = "Year",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    ggrepel::geom_text_repel(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE,
-      max.overlaps = 1000
-    )
-  p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family diversity by year with sites") +
-    scale_color_discrete(
-      name = "Year",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    geom_text(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE
-    )
-  p5 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family diversity by sampling period") +
-    stat_ellipse() +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023"),
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    geom_text(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE
-    )
-  p6 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = site)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family diversity by site") +
-    scale_color_discrete(
-      name = "Site",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    ggrepel::geom_text_repel(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE,
-      max.overlaps = 1000
-    )
-}
-
-{
-  ggsave(
-    "./MDS_plots/family_grouped/diversity/year_all.png",
-    plot = p1,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/diversity/period_all.png",
-    plot = p2,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/diversity/year_all_sites_jitter.png",
-    plot = p3,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/diversity/year_all_sites.png",
-    plot = p4,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/diversity/period_all_sites.png",
-    plot = p5,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/diversity/sites_jitter.png",
-    plot = p6,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-
-  rm(
-    fam_presence_values,
-    fam_presence_cats,
-    Herb_community.mds,
-    MDS_xy,
-    p1,
-    p2,
-    p3,
-    p4,
-    p5,
-    p6
-  )
-}
+#   rm(
+#     fam_presence_values,
+#     fam_presence_cats,
+#     Herb_community.mds,
+#     MDS_xy,
+#     p1,
+#     p2,
+#     p3,
+#     p4,
+#     p5,
+#     p6
+#   )
+# }
 
 # dist <- vegdist(fam_presence_values, method = "bray")
-# anosim_type <- anosim(dist,fam_presence_cats$site)
+# anosim_type <- anosim(dist, fam_presence_cats$site)
 # summary(anosim_type)
 
-# site-specific #
+# # site-specific #
 
-for (k in 1:17) {
-  x <- fam_presence %>% filter(site == k)
-  fam_presence_values <- x %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(5:7)
-  fam_presence_cats <- x %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(1:4)
-  Herb_community.mds <- fam_presence_values %>%
-    metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
-  MDS_xy <- data.frame(Herb_community.mds$points)
-  MDS_xy$site <- fam_presence_cats$site
-  MDS_xy$replicate <- fam_presence_cats$replicate
-  MDS_xy$year <- fam_presence_cats$year
-  MDS_xy$period <- fam_presence_cats$period
-  Herb_community.mds$stress
+# for (k in 1:17) {
+#   x <- fam_presence %>%
+#     filter(site == k) %>%
+#     mutate(decostand(across(where(is.numeric)), "pa"))
+#   fam_presence_values <- x %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(5:7)
+#   fam_presence_cats <- x %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(1:4)
+#   Herb_community.mds <- fam_presence_values %>%
+#     metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
+#   MDS_xy <- data.frame(Herb_community.mds$points)
+#   MDS_xy$site <- fam_presence_cats$site
+#   MDS_xy$replicate <- fam_presence_cats$replicate
+#   MDS_xy$year <- fam_presence_cats$year
+#   MDS_xy$period <- fam_presence_cats$period
+#   Herb_community.mds$stress
 
-  pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_jitter() +
-    theme_bw() +
-    ggtitle(paste0("Site ", k, ", family diversity by year")) +
-    scale_color_discrete(name = "Year")
-  pb <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    geom_jitter(width = 0.02, height = 0.02) +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle(paste0("Site ", k, ", family diversity by sampling period")) +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    )
+#   pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     geom_jitter() +
+#     theme_bw() +
+#     ggtitle(paste0("Site ", k, ", family presence by year")) +
+#     scale_color_discrete(name = "Year")
+#   (pb <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     geom_jitter(width = 0.02, height = 0.02) +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle(paste0("Site ", k, ", family presence by sampling period")) +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023")
+#     ))
 
-  ggsave(
-    paste0("./MDS_plots/family_grouped/diversity/year/site_", k, ".png"),
-    plot = pa,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
-  ggsave(
-    paste0("./MDS_plots/family_grouped/diversity/period/site_", k, ".png"),
-    plot = pb,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
+#   ggsave(
+#     paste0("./MDS_plots/family_grouped/presence_absence/year/site_", k, ".png"),
+#     plot = pa,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white",
+#     create.dir = TRUE
+#   )
+#   ggsave(
+#     paste0(
+#       "./MDS_plots/family_grouped/presence_absence/period/site_",
+#       k,
+#       ".png"
+#     ),
+#     plot = pb,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white",
+#     create.dir = TRUE
+#   )
 
-  {
-    if (k == 17) {
-      rm(
-        k,
-        x,
-        fam_presence_values,
-        fam_presence_cats,
-        Herb_community.mds,
-        MDS_xy,
-        pa,
-        pb
-      )
-    }
-  }
-}
+#   {
+#     if (k == 17) {
+#       rm(
+#         k,
+#         x,
+#         fam_presence_values,
+#         fam_presence_cats,
+#         Herb_community.mds,
+#         MDS_xy,
+#         pa,
+#         pb
+#       )
+#     }
+#   }
+# }
 
-# abundance ##
-# all sites #
+# # random
 
-{
-  fam_sums_values <- fam_sums[, 5:7] %>%
-    filter(rowSums(across(where(is.numeric))) != 0)
-  fam_sums_cats <- fam_sums %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(1:4)
-  Herb_community.mds <- fam_sums_values %>%
-    metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
-  MDS_xy <- data.frame(Herb_community.mds$points)
-  MDS_xy$site <- fam_sums_cats$site
-  MDS_xy$replicate <- fam_sums_cats$replicate
-  MDS_xy$year <- fam_sums_cats$year
-  MDS_xy$period <- fam_sums_cats$period
-  Herb_community.mds$stress
+# MDS_xy %>%
+#   filter(year == "2022") %>%
+#   ggplot(., aes(MDS1, MDS2, color = site)) +
+#   theme_bw() +
+#   geom_point(alpha = 0) +
+#   ggtitle("Family presence by site") +
+#   scale_color_discrete(
+#     name = "Year",
+#     guide = guide_legend(override.aes = list(alpha = 1))
+#   ) +
+#   geom_text(
+#     data = MDS_xy,
+#     mapping = aes(MDS1, MDS2, label = site),
+#     show.legend = FALSE,
+#     max.overlaps = 1000
+#   ) +
+#   stat_ellipse()
 
-  p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_point() +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle("Family abundance by year") +
-    scale_color_discrete(name = "Year")
-  p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    geom_point() +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle("Family abundance by sampling period") +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    )
-  p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family abundance by year with sites, overlaps jittered") +
-    scale_color_discrete(
-      name = "Year",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    ggrepel::geom_text_repel(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE,
-      max.overlaps = 1000
-    )
-  p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family abundance by year with sites") +
-    scale_color_discrete(
-      name = "Year",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    geom_text(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE
-    )
-  p5 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family abundance by sampling period") +
-    stat_ellipse() +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023"),
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    geom_text(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE
-    )
-  p6 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = site)) +
-    theme_bw() +
-    geom_point(alpha = 0) +
-    ggtitle("Family abundance by site") +
-    scale_color_discrete(
-      name = "Site",
-      guide = guide_legend(override.aes = list(alpha = 1))
-    ) +
-    ggrepel::geom_text_repel(
-      data = MDS_xy,
-      mapping = aes(MDS1, MDS2, label = site),
-      show.legend = FALSE,
-      max.overlaps = 1000
-    )
-}
+# # diversity ##
+# # all sites #
 
-{
-  ggsave(
-    "./MDS_plots/family_grouped/abundance/year_all.png",
-    plot = p1,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/abundance/period_all.png",
-    plot = p2,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/abundance/year_all_sites_jitter.png",
-    plot = p3,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/abundance/year_all_sites.png",
-    plot = p4,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/abundance/period_all_sites.png",
-    plot = p5,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
-  ggsave(
-    "./MDS_plots/family_grouped/abundance/sites_jitter.png",
-    plot = p6,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white"
-  )
+# {
+#   fam_presence_values <- fam_presence[, 5:7] %>%
+#     filter(rowSums(across(where(is.numeric))) != 0)
+#   fam_presence_cats <- fam_presence %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(1:4)
+#   Herb_community.mds <- fam_presence_values %>%
+#     metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
+#   MDS_xy <- data.frame(Herb_community.mds$points)
+#   MDS_xy$site <- fam_presence_cats$site
+#   MDS_xy$replicate <- fam_presence_cats$replicate
+#   MDS_xy$year <- fam_presence_cats$year
+#   MDS_xy$period <- fam_presence_cats$period
+#   Herb_community.mds$stress
 
-  rm(
-    fam_sums_values,
-    fam_sums_cats,
-    Herb_community.mds,
-    MDS_xy,
-    p1,
-    p2,
-    p3,
-    p4,
-    p5,
-    p6
-  )
-}
+#   p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     geom_point() +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle("Family diversity by year") +
+#     scale_color_discrete(name = "Year")
+#   p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     geom_point() +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle("Family diversity by sampling period") +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023")
+#     )
+#   p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family diversity by year with sites, overlaps jittered") +
+#     scale_color_discrete(
+#       name = "Year",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     ggrepel::geom_text_repel(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE,
+#       max.overlaps = 1000
+#     )
+#   p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family diversity by year with sites") +
+#     scale_color_discrete(
+#       name = "Year",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     geom_text(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE
+#     )
+#   p5 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family diversity by sampling period") +
+#     stat_ellipse() +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023"),
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     geom_text(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE
+#     )
+#   p6 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = site)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family diversity by site") +
+#     scale_color_discrete(
+#       name = "Site",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     ggrepel::geom_text_repel(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE,
+#       max.overlaps = 1000
+#     )
+# }
 
-dist <- vegdist(fam_sums_values, method = "bray")
-anosim_type <- anosim(dist, fam_sums_cats$site)
-summary(anosim_type)
+# {
+#   ggsave(
+#     "./MDS_plots/family_grouped/diversity/year_all.png",
+#     plot = p1,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/diversity/period_all.png",
+#     plot = p2,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/diversity/year_all_sites_jitter.png",
+#     plot = p3,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/diversity/year_all_sites.png",
+#     plot = p4,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/diversity/period_all_sites.png",
+#     plot = p5,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/diversity/sites_jitter.png",
+#     plot = p6,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
 
-# site-specific #
+#   rm(
+#     fam_presence_values,
+#     fam_presence_cats,
+#     Herb_community.mds,
+#     MDS_xy,
+#     p1,
+#     p2,
+#     p3,
+#     p4,
+#     p5,
+#     p6
+#   )
+# }
 
-for (k in 1:17) {
-  x <- fam_sums %>% filter(site == k)
-  fam_sums_values <- x %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(5:7)
-  fam_sums_cats <- x %>%
-    filter(rowSums(across(where(is.numeric))) != 0) %>%
-    select(1:4)
-  Herb_community.mds <- fam_sums_values %>%
-    metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
-  MDS_xy <- data.frame(Herb_community.mds$points)
-  MDS_xy$site <- fam_sums_cats$site
-  MDS_xy$replicate <- fam_sums_cats$replicate
-  MDS_xy$year <- fam_sums_cats$year
-  MDS_xy$period <- fam_sums_cats$period
-  Herb_community.mds$stress
+# # dist <- vegdist(fam_presence_values, method = "bray")
+# # anosim_type <- anosim(dist,fam_presence_cats$site)
+# # summary(anosim_type)
 
-  pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_jitter() +
-    theme_bw() +
-    ggtitle(paste0("Site ", k, ", family abundance by year")) +
-    scale_color_discrete(name = "Year")
-  (pb <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
-    geom_jitter(width = 0.02, height = 0.02) +
-    stat_ellipse() +
-    theme_bw() +
-    ggtitle(paste0("Site ", k, ", family abundance by sampling period")) +
-    scale_color_discrete(
-      name = "Sampling period",
-      labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    ))
+# # site-specific #
 
-  ggsave(
-    paste0("./MDS_plots/family_grouped/abundance/year/site_", k, ".png"),
-    plot = pa,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
-  ggsave(
-    paste0("./MDS_plots/family_grouped/abundance/period/site_", k, ".png"),
-    plot = pb,
-    width = 4000,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
+# for (k in 1:17) {
+#   x <- fam_presence %>% filter(site == k)
+#   fam_presence_values <- x %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(5:7)
+#   fam_presence_cats <- x %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(1:4)
+#   Herb_community.mds <- fam_presence_values %>%
+#     metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
+#   MDS_xy <- data.frame(Herb_community.mds$points)
+#   MDS_xy$site <- fam_presence_cats$site
+#   MDS_xy$replicate <- fam_presence_cats$replicate
+#   MDS_xy$year <- fam_presence_cats$year
+#   MDS_xy$period <- fam_presence_cats$period
+#   Herb_community.mds$stress
 
-  {
-    if (k == 17) {
-      rm(
-        k,
-        x,
-        fam_sumse_values,
-        fam_sums_cats,
-        Herb_community.mds,
-        MDS_xy,
-        pa,
-        pb
-      )
-    }
-  }
-}
+#   pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     geom_jitter() +
+#     theme_bw() +
+#     ggtitle(paste0("Site ", k, ", family diversity by year")) +
+#     scale_color_discrete(name = "Year")
+#   pb <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     geom_jitter(width = 0.02, height = 0.02) +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle(paste0("Site ", k, ", family diversity by sampling period")) +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023")
+#     )
+
+#   ggsave(
+#     paste0("./MDS_plots/family_grouped/diversity/year/site_", k, ".png"),
+#     plot = pa,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white",
+#     create.dir = TRUE
+#   )
+#   ggsave(
+#     paste0("./MDS_plots/family_grouped/diversity/period/site_", k, ".png"),
+#     plot = pb,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white",
+#     create.dir = TRUE
+#   )
+
+#   {
+#     if (k == 17) {
+#       rm(
+#         k,
+#         x,
+#         fam_presence_values,
+#         fam_presence_cats,
+#         Herb_community.mds,
+#         MDS_xy,
+#         pa,
+#         pb
+#       )
+#     }
+#   }
+# }
+
+# # abundance ##
+# # all sites #
+
+# {
+#   fam_sums_values <- fam_sums[, 5:7] %>%
+#     filter(rowSums(across(where(is.numeric))) != 0)
+#   fam_sums_cats <- fam_sums %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(1:4)
+#   Herb_community.mds <- fam_sums_values %>%
+#     metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
+#   MDS_xy <- data.frame(Herb_community.mds$points)
+#   MDS_xy$site <- fam_sums_cats$site
+#   MDS_xy$replicate <- fam_sums_cats$replicate
+#   MDS_xy$year <- fam_sums_cats$year
+#   MDS_xy$period <- fam_sums_cats$period
+#   Herb_community.mds$stress
+
+#   p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     geom_point() +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle("Family abundance by year") +
+#     scale_color_discrete(name = "Year")
+#   p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     geom_point() +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle("Family abundance by sampling period") +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023")
+#     )
+#   p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family abundance by year with sites, overlaps jittered") +
+#     scale_color_discrete(
+#       name = "Year",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     ggrepel::geom_text_repel(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE,
+#       max.overlaps = 1000
+#     )
+#   p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family abundance by year with sites") +
+#     scale_color_discrete(
+#       name = "Year",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     geom_text(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE
+#     )
+#   p5 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family abundance by sampling period") +
+#     stat_ellipse() +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023"),
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     geom_text(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE
+#     )
+#   p6 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = site)) +
+#     theme_bw() +
+#     geom_point(alpha = 0) +
+#     ggtitle("Family abundance by site") +
+#     scale_color_discrete(
+#       name = "Site",
+#       guide = guide_legend(override.aes = list(alpha = 1))
+#     ) +
+#     ggrepel::geom_text_repel(
+#       data = MDS_xy,
+#       mapping = aes(MDS1, MDS2, label = site),
+#       show.legend = FALSE,
+#       max.overlaps = 1000
+#     )
+# }
+
+# {
+#   ggsave(
+#     "./MDS_plots/family_grouped/abundance/year_all.png",
+#     plot = p1,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/abundance/period_all.png",
+#     plot = p2,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/abundance/year_all_sites_jitter.png",
+#     plot = p3,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/abundance/year_all_sites.png",
+#     plot = p4,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/abundance/period_all_sites.png",
+#     plot = p5,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+#   ggsave(
+#     "./MDS_plots/family_grouped/abundance/sites_jitter.png",
+#     plot = p6,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white"
+#   )
+
+#   rm(
+#     fam_sums_values,
+#     fam_sums_cats,
+#     Herb_community.mds,
+#     MDS_xy,
+#     p1,
+#     p2,
+#     p3,
+#     p4,
+#     p5,
+#     p6
+#   )
+# }
+
+# dist <- vegdist(fam_sums_values, method = "bray")
+# anosim_type <- anosim(dist, fam_sums_cats$site)
+# summary(anosim_type)
+
+# # site-specific #
+
+# for (k in 1:17) {
+#   x <- fam_sums %>% filter(site == k)
+#   fam_sums_values <- x %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(5:7)
+#   fam_sums_cats <- x %>%
+#     filter(rowSums(across(where(is.numeric))) != 0) %>%
+#     select(1:4)
+#   Herb_community.mds <- fam_sums_values %>%
+#     metaMDS(comm = ., distance = "bray", trace = FALSE, autotransform = FALSE)
+#   MDS_xy <- data.frame(Herb_community.mds$points)
+#   MDS_xy$site <- fam_sums_cats$site
+#   MDS_xy$replicate <- fam_sums_cats$replicate
+#   MDS_xy$year <- fam_sums_cats$year
+#   MDS_xy$period <- fam_sums_cats$period
+#   Herb_community.mds$stress
+
+#   pa <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
+#     geom_jitter() +
+#     theme_bw() +
+#     ggtitle(paste0("Site ", k, ", family abundance by year")) +
+#     scale_color_discrete(name = "Year")
+#   (pb <- ggplot(MDS_xy, aes(MDS1, MDS2, color = period)) +
+#     geom_jitter(width = 0.02, height = 0.02) +
+#     stat_ellipse() +
+#     theme_bw() +
+#     ggtitle(paste0("Site ", k, ", family abundance by sampling period")) +
+#     scale_color_discrete(
+#       name = "Sampling period",
+#       labels = c("old" = "2002/2003", "modern" = "2022/2023")
+#     ))
+
+#   ggsave(
+#     paste0("./MDS_plots/family_grouped/abundance/year/site_", k, ".png"),
+#     plot = pa,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white",
+#     create.dir = TRUE
+#   )
+#   ggsave(
+#     paste0("./MDS_plots/family_grouped/abundance/period/site_", k, ".png"),
+#     plot = pb,
+#     width = 4000,
+#     height = 2160,
+#     units = "px",
+#     bg = "white",
+#     create.dir = TRUE
+#   )
+
+#   {
+#     if (k == 17) {
+#       rm(
+#         k,
+#         x,
+#         fam_sumse_values,
+#         fam_sums_cats,
+#         Herb_community.mds,
+#         MDS_xy,
+#         pa,
+#         pb
+#       )
+#     }
+#   }
+# }
 
 # boxplots of all years ####
 
