@@ -78,13 +78,18 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
       `Ca (%)` +
       mMax_tair +
       `pH (Kcl)` +
+      relhum +
+      swdown +
+      mMax_tground +
+      rock_soil +
       veg +
       mMax_precip,
     data = Zenv_data
   )
-  # spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
+
   RsquareAdj(spe.rda.signif)
 }
+
 RsquareAdj(model_full)
 
 summary(fwd.sel)
@@ -98,8 +103,8 @@ anova.cca(spe.rda.signif, step = 1000)
 anova.cca(spe.rda.signif, step = 1000, by = "term")
 anova.cca(spe.rda.signif, step = 1000, by = "axis")
 
-ef <- envfit(spe.rda.signif, Zenv_data, choices = c(1, 2))
-ef
+# ef <- envfit(spe.rda.signif, Zenv_data, choices = c(1, 2))
+# ef
 
 {
   smry <- scores(spe.rda.signif)
@@ -146,7 +151,7 @@ ef
         ),
         position = position_jitter(),
         color = "black",
-        size = 6
+        size = 9
       ) +
       geom_text(
         data = df2,
@@ -158,9 +163,9 @@ ef
         color = "blue",
         vjust = "inward",
         hjust = "inward",
-        size = 7
+        size = 9
       ) +
-      scale_x_continuous(limits = c(-0.6, 1.64)) +
+      scale_x_continuous(limits = c(-0.6, 1.7)) +
       scale_colour_discrete(
         labels = c(
           "Alpine",
@@ -182,6 +187,12 @@ ef
           "Succulent Karoo"
         ),
         name = "Vegetation Type"
+      ) +
+      theme(
+        legend.text = element_text(size = 25),
+        legend.title = element_text(size = 25),
+        axis.text = element_text(size = 25),
+        axis.title = element_text(size = 25)
       )
     rda.biplot
   }

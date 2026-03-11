@@ -54,20 +54,29 @@ Zenv_data <- Zenv_data %>%
 model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
 # Forward selection of variables:
-# Forward selection of variables:
-fwd.sel <- ordistep(
-  rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
-  scope = formula(model_full), # upper model limit (the "full" model)
-  direction = "forward",
-  R2scope = FALSE, # can't surpass the "full" model's R2
-  trace = FALSE
-)
 
-fwd.sel$call
+{
+  fwd.sel <- ordistep(
+    rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
+    scope = formula(model_full), # upper model limit (the "full" model)
+    direction = "forward",
+    R2scope = FALSE,
+    trace = FALSE
+  )
+  fwd.sel$call
+}
 
 {
   spe.rda.signif <- rda(
-    formula = Zspp_data ~ Name + m_tair + relhum + swdown + m_precip,
+    formula = Zspp_data ~ Name +
+      m_tair +
+      `pH (Kcl)` +
+      `Na (%)` +
+      `Mg (%)` +
+      veg +
+      range_tground +
+      # rock_soil +
+      mMax_precip,
     data = Zenv_data
   )
 
@@ -134,7 +143,7 @@ ef
           vjust = 0.5 * (1 - sign(RDA2))
         ),
         color = "black",
-        size = 6
+        size = 9
       ) +
       # geom_text(
       #   data = df2,
@@ -170,6 +179,12 @@ ef
           "Succulent Karoo"
         ),
         name = "Vegetation Type"
+      ) +
+      theme(
+        legend.text = element_text(size = 25),
+        legend.title = element_text(size = 25),
+        axis.text = element_text(size = 25),
+        axis.title = element_text(size = 25)
       )
     rda.biplot
   }

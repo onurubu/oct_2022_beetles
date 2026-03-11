@@ -143,7 +143,7 @@ ef
         ),
         position = position_jitter(),
         color = "black",
-        size = 6
+        size = 9
       ) +
       # geom_text(
       #   data = df2,
@@ -179,6 +179,12 @@ ef
           "Succulent Karoo"
         ),
         name = "Vegetation Type"
+      ) +
+      theme(
+        legend.text = element_text(size = 25),
+        legend.title = element_text(size = 25),
+        axis.text = element_text(size = 25),
+        axis.title = element_text(size = 25)
       )
     rda.biplot
   }

@@ -34,6 +34,7 @@ Zenv_data <- as.data.frame(scale(
 
 # Add site labels for plotting
 Zenv_data$Name <- spp_data_all$site
+Zenv_data$year <- spp_data_all$year
 Zenv_data <- Zenv_data %>%
   mutate(
     slope = as.factor(case_when(
@@ -54,28 +55,31 @@ Zenv_data <- Zenv_data %>%
 model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 
 # Forward selection of variables:
-fwd.sel <- ordistep(
-  rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
-  scope = formula(model_full), # upper model limit (the "full" model)
-  direction = "forward",
-  R2scope = FALSE, # can't surpass the "full" model's R2
-  trace = FALSE
-)
 
-fwd.sel$call
+{
+  fwd.sel <- ordistep(
+    rda(Zspp_data ~ 1, data = Zenv_data), # lower model limit (simple!)
+    scope = formula(model_full), # upper model limit (the "full" model)
+    direction = "forward",
+    R2scope = FALSE,
+    trace = FALSE
+  )
+
+  fwd.sel$call
+}
 
 {
   spe.rda.signif <- rda(
     formula = Zspp_data ~ AMin_tair +
+      `pH (Kcl)` +
+      year +
       Name +
       relhum +
-      winddir +
-      difrad +
-      # windspeed +
-      mMin_precip +
       swdown +
-      m_precip +
-      mMin_tground,
+      `Mg (%)` +
+      mMax_tground +
+      veg +
+      m_precip,
     data = Zenv_data
   )
 
@@ -143,7 +147,7 @@ ef
         ),
         position = position_jitter(),
         color = "black",
-        size = 6
+        size = 9
       ) +
       # geom_text(
       #   data = df2,
@@ -179,6 +183,12 @@ ef
           "Succulent Karoo"
         ),
         name = "Vegetation Type"
+      ) +
+      theme(
+        legend.text = element_text(size = 25),
+        legend.title = element_text(size = 25),
+        axis.text = element_text(size = 25),
+        axis.title = element_text(size = 25)
       )
     rda.biplot
   }
@@ -186,34 +196,38 @@ ef
 
 # glm trials ####
 
-# hist_full <- full_join(abund_all, env_all) %>%
-#   mutate(slope = Zenv_data$slope) %>%
-#   mutate(
-#     abundance = rowSums(across(c(
-#       anthia_decemguttata,
-#       stenocara_dentata,
-#       zophosis_gracilicornis
-#     )))
-#   )
+seas_full <- spp_data_all %>%
+  mutate(
+    abundance = rowSums(across(where(is.numeric)))
+  ) %>%
+  select(c(1:5), abundance) %>%
+  full_join(., env_season) %>%
+  mutate(Name = Zenv_data$Name)
 
-# glm_env_period <- hist_full %>%
-#   MCMCglmm(
-#     data = .,
-#     fixed = abundance ~ (site +
-#       AMin_tground +
-#       d_fire +
-#       `C (%)` +
-#       `H+ (cmol/Kg)` +
-#       mMax_tair +
-#       `NO3 (mg/kg)` +
-#       Mg +
-#       pres +
-#       rock_soil) *
-#       period,
-#     random = ~site,
-#     family = "poisson"
-#   )
-# summary(glm_env_period)
+glm_env_period <- seas_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = abundance ~ (AMin_tair +
+      `pH (Kcl)` +
+      year +
+      Name +
+      relhum +
+      swdown +
+      `Mg (%)` +
+      mMax_tground +
+      veg +
+      m_precip) *
+      year,
+    random = ~site,
+    family = "poisson"
+  )
+summary(glm_env_period)
+
+xxx <- seas_full %>%
+  group_by(year, site) %>%
+  summarise(mveg = mean(veg)) %>%
+  pivot_wider(names_from = c(year), values_from = c(mveg)) %>%
+  mutate(grow = `2023` > `2022`)
 
 ##############################################
 # Indicator Species Analysis by Vegetation Type

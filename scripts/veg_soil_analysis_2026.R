@@ -620,10 +620,11 @@ summary(model_maxhgt_period_sites)
           season = as.factor(rep("October", nrow(.))),
           period = as.factor(rep("modern", nrow(.)))
         ) %>%
-        relocate(site, replicate, year, season, period)
+        relocate(site, replicate, year, season, period) %>%
+        ungroup()
 
       soil_dat <- rbind(soil_dat_02, soil_dat_22)
-      rm(soil_dat_02, soil_dat_22)
+      rm(soil_dat_02)
     }
 
     veg_height <- data.table::fread(
@@ -797,10 +798,15 @@ summary(model_maxhgt_period_sites)
       mutate(year = as.factor(year), month = as.factor(month)) %>%
       relocate(site, replicate, year, month)
 
+    soil_dat_22 <- soil_dat_22 %>% select(-c(season, period))
+
     dat <- full_join(xcover, veg_height_season)
     dat <- full_join(dat, xfire)
     dat <- full_join(dat, clim_data_season)
     dat <- full_join(dat, clim_data_ex_season)
+    dat <- dat %>% ungroup()
+    dat <- full_join(dat, soil_dat_22)
+
     env_season <- left_join(dat, site_data) %>%
       mutate(
         veg_type = factor(case_when(
@@ -838,6 +844,7 @@ summary(model_maxhgt_period_sites)
       site_data,
       veg_cover_comp,
       veg_height_comp,
+      soil_dat_22,
       site_areas
     )
   }
