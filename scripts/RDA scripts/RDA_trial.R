@@ -90,6 +90,27 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
   RsquareAdj(spe.rda.signif)
 }
 
+{
+  spe.rda.signif <- rda(
+    formula = Zspp_data ~ Name +
+      period +
+      `Mg (%)` +
+      Ca +
+      `Ca (%)` +
+      mMax_tair +
+      `pH (Kcl)` +
+      relhum +
+      swdown +
+      mMax_tground +
+      rock_soil +
+      veg +
+      mMax_precip,
+    data = Zenv_data
+  )
+
+  RsquareAdj(spe.rda.signif)
+}
+
 RsquareAdj(model_full)
 
 summary(fwd.sel)
