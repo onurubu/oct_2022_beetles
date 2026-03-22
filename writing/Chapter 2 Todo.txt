@@ -1,0 +1,24 @@
+Chapter 2 TODO:
+
+  Introduction:
+    Address Charlene's comments
+    Polish.
+
+  Methods:
+    Address Charlene's comments
+    Add any new results that are not in the methods
+
+
+  Results:
+    Change plots without axis grid lines to include axis grid lines and increase font size
+    Add stress and R values to all nmds figure captions
+    Add soil to the results for environmental change
+    Add alpha/beta/gamma/zeta diversity for historical comparisons?
+    Add rarefaction
+    
+
+  Discussion:
+    Write based on finished results
+    
+  Appendix
+    Do at the end after all else
