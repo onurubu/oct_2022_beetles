@@ -21,24 +21,44 @@ rm(list = ls())
 
 # reading in raw data with correct data types
 {
+  # alt_labels <- c(
+  #   "0m(W)",
+  #   "200m(W)",
+  #   "300m(W)",
+  #   "500m(W)",
+  #   "700m(W)",
+  #   "900m(W)",
+  #   "1100m(W)",
+  #   "1300m(W)",
+  #   "1500m(W)",
+  #   "1700m(W)",
+  #   "1900m(W)",
+  #   "1700m(E)",
+  #   "1500m(E)",
+  #   "1300m(E)",
+  #   "1100m(E)",
+  #   "900m(E)",
+  #   "500m(E)"
+  # )
+
   alt_labels <- c(
-    "0m(W)",
-    "200m(W)",
-    "300m(W)",
-    "500m(W)",
-    "700m(W)",
-    "900m(W)",
-    "1100m(W)",
-    "1300m(W)",
-    "1500m(W)",
-    "1700m(W)",
-    "1900m(W)",
-    "1700m(E)",
-    "1500m(E)",
-    "1300m(E)",
-    "1100m(E)",
-    "900m(E)",
-    "500m(E)"
+    "0 W",
+    "200 W",
+    "300 W",
+    "500 W",
+    "700 W",
+    "900 W",
+    "1100 W",
+    "1300 W",
+    "1500 W",
+    "1700 W",
+    "1900 W",
+    "1700 E",
+    "1500 E",
+    "1300 E",
+    "1100 E",
+    "900 E",
+    "500 E"
   )
 
   beet_wern <- read.csv(
@@ -234,17 +254,23 @@ Sys.sleep(0.1)
 
   p3 <- modern_species_div %>%
     ggplot(aes(x = site, y = richness, fill = year)) +
-    theme_minimal(base_size = 11) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
-    labs(x = "Altitude and Aspect", y = "Species richness") +
+    theme_minimal(base_size = 14) +
+    # theme(
+    #   panel.grid.major = element_blank(),
+    #   panel.grid.minor = element_blank()
+    # ) +
+    labs(x = "Altitude (m) and Aspect", y = "Species richness") +
     ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_x_discrete(labels = alt_labels) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
     stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 18),
+      axis.title = element_text(size = 25)
+    ) +
     scale_fill_discrete(
       name = "Season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
@@ -252,17 +278,23 @@ Sys.sleep(0.1)
 
   p4 <- modern_species_div %>%
     ggplot(aes(x = site, y = abundance, fill = year)) +
-    theme_minimal(base_size = 11) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
-    labs(x = "Altitude and Aspect", y = "Abundance") +
+    theme_minimal(base_size = 14) +
+    # theme(
+    #   panel.grid.major = element_blank(),
+    #   panel.grid.minor = element_blank()
+    # ) +
+    labs(x = "Altitude (m) and Aspect", y = "Abundance") +
     ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_x_discrete(labels = alt_labels) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
     stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 18),
+      axis.title = element_text(size = 25)
+    ) +
     scale_fill_discrete(
       name = "Season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
@@ -305,10 +337,10 @@ Sys.sleep(0.1)
   p7 <- modern_species_div %>%
     ggplot(aes(x = veg_type, y = richness, fill = year)) +
     theme_minimal(base_size = 11) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
+    # theme(
+    #   panel.grid.major = element_blank(),
+    #   panel.grid.minor = element_blank()
+    # ) +
     labs(x = "Vegetation Type", y = "Species richness") +
     ggtitle(
       ""
@@ -316,6 +348,12 @@ Sys.sleep(0.1)
     theme(plot.title = element_text(hjust = 0.5)) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
     stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 18),
+      axis.title = element_text(size = 25)
+    ) +
     scale_fill_discrete(
       name = "Season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
@@ -324,10 +362,10 @@ Sys.sleep(0.1)
   p8 <- modern_species_div %>%
     ggplot(aes(x = veg_type, y = abundance, fill = year)) +
     theme_minimal(base_size = 11) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
+    # theme(
+    #   panel.grid.major = element_blank(),
+    #   panel.grid.minor = element_blank()
+    # ) +
     labs(x = "Vegetation Type", y = "Abundance") +
     ggtitle(
       ""
@@ -335,6 +373,12 @@ Sys.sleep(0.1)
     theme(plot.title = element_text(hjust = 0.5)) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
     stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 18),
+      axis.title = element_text(size = 25)
+    ) +
     scale_fill_discrete(
       name = "Season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
@@ -2830,25 +2874,33 @@ for (k in 1:17) {
     ggplot(aes(x = site, y = abundance, fill = year)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
+    # theme(
+    #   panel.grid.major = element_blank(),
+    #   panel.grid.minor = element_blank()
+    # ) +
     labs(x = "Site", y = "Mean Abundance") +
     ggtitle("All species mean abundance per year") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_y_continuous(limits = c(0, max(abund_box_data$abundance))) +
-    scale_fill_discrete(name = "Year")
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 18),
+      axis.title = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
+    scale_fill_discrete(name = "Year") +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
 
   p3 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
     ggplot(aes(x = period, y = abundance)) +
     geom_boxplot() +
     theme_minimal(base_size = 10) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
+    # theme(
+    #   panel.grid.major = element_blank(),
+    #   panel.grid.minor = element_blank()
+    # ) +
     labs(x = "Year", y = "Mean Abundance") +
     ggtitle("All species mean abundance per sampling period") +
     theme(plot.title = element_text(hjust = 0.5)) +
@@ -2859,18 +2911,26 @@ for (k in 1:17) {
     ggplot(aes(x = site, y = abundance, fill = period)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
+    # theme(
+    #   panel.grid.major = element_blank(),
+    #   panel.grid.minor = element_blank()
+    # ) +
     labs(x = "Site", y = "Mean Abundance") +
-    ggtitle("All species mean abundance per samplling period") +
+    # ggtitle("All species mean abundance per samplling period") +
     theme(plot.title = element_text(hjust = 0.5)) +
     scale_y_continuous(limits = c(0, max(abund_box_data$abundance))) +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 18),
+      axis.title = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
     scale_fill_discrete(
-      name = "Sampling period",
+      name = "Sample",
       labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    )
+    ) +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
 }
 
 {
