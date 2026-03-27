@@ -150,7 +150,7 @@ rm(list = ls())
     ) %>%
     relocate(site, replicate, year, season, period)
 
-  rm(abund_modern, abund_old, beet_wern, df1, df2, beet_22, beet_23)
+  rm(abund_modern, beet_wern, df1, df2, beet_22, beet_23)
 
   abund_all <- abund_all %>% filter(paste(year, season) != "2023 March")
 }
@@ -3286,3 +3286,174 @@ hist_abund_table_all <- abund_all %>%
     select(veg_type, abundance_sd, rchnss_sd)
   rm(modern_species_abund, modern_species_richness, modern_species_div)
 }
+
+
+# species density comparisons
+
+{
+  dens_hist <- abund_old %>%
+    mutate(
+      veg_type = factor(case_when(
+        site %in% c(1) ~ "strandveld",
+        site %in% c(2, 6, 16) ~ "restioid",
+        site %in% c(3, 4, 5) ~ "proteoid",
+        site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+        site %in% c(11) ~ "alpine",
+        site %in% c(17) ~ "succulent_karoo"
+      ))
+    ) %>%
+    mutate(richness = specnumber(across(where(is.numeric)))) %>%
+    select(1:4, veg_type, richness) %>%
+    group_by(veg_type) %>%
+    summarise(se = plotrix::std.error(richness), richness = mean(richness)) %>%
+    mutate(
+      dens_se = paste(
+        signif(richness, digits = 3),
+        "±",
+        signif(se, digits = 3)
+      ),
+    ) %>%
+    mutate(year = as.factor(rep("2002", nrow(.)))) %>%
+    mutate(
+      veg_type = factor(
+        veg_type,
+        levels = c(
+          "strandveld",
+          "restioid",
+          "proteoid",
+          "ericaceous",
+          "alpine",
+          "succulent_karoo"
+        )
+      )
+    ) %>%
+    arrange(veg_type) %>%
+    select(veg_type, year, dens_se)
+
+  dens_mod <- beet_wide %>%
+    filter(paste(season, year) != "March 2023") %>%
+    group_by(site, replicate) %>%
+    summarise(across(where(is.numeric), sum), .groups = "drop") %>%
+    mutate(
+      veg_type = factor(case_when(
+        site %in% c(1) ~ "strandveld",
+        site %in% c(2, 6, 16) ~ "restioid",
+        site %in% c(3, 4, 5) ~ "proteoid",
+        site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+        site %in% c(11) ~ "alpine",
+        site %in% c(17) ~ "succulent_karoo"
+      ))
+    ) %>%
+    mutate(richness = specnumber(across(where(is.numeric)))) %>%
+    select(1:2, veg_type, richness) %>%
+    group_by(veg_type) %>%
+    summarise(se = plotrix::std.error(richness), richness = mean(richness)) %>%
+    mutate(
+      dens_se = paste(
+        signif(richness, digits = 3),
+        "±",
+        signif(se, digits = 3)
+      ),
+    ) %>%
+    mutate(year = as.factor(rep("2022", nrow(.)))) %>%
+    mutate(
+      veg_type = factor(
+        veg_type,
+        levels = c(
+          "strandveld",
+          "restioid",
+          "proteoid",
+          "ericaceous",
+          "alpine",
+          "succulent_karoo"
+        )
+      )
+    ) %>%
+    arrange(veg_type) %>%
+    select(veg_type, year, dens_se)
+  dens_comp <- rbind(dens_hist, dens_mod)
+  dens_comp <- dens_comp %>%
+    pivot_wider(names_from = year, values_from = dens_se)
+  rm(dens_hist, dens_mod)
+}
+
+# density boxplot
+
+{
+  xx <- abund_old %>%
+    mutate(
+      veg_type = factor(case_when(
+        site %in% c(1) ~ "strandveld",
+        site %in% c(2, 6, 16) ~ "restioid",
+        site %in% c(3, 4, 5) ~ "proteoid",
+        site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+        site %in% c(11) ~ "alpine",
+        site %in% c(17) ~ "succulent_karoo"
+      ))
+    ) %>%
+    mutate(richness = specnumber(across(where(is.numeric)))) %>%
+    select(1:4, veg_type, richness) %>%
+    mutate(period = "old") %>%
+    select(veg_type, period, richness)
+  yy <- beet_wide %>%
+    filter(paste(season, year) != "March 2023") %>%
+    group_by(site, replicate) %>%
+    summarise(across(where(is.numeric), sum), .groups = "drop") %>%
+    mutate(
+      veg_type = factor(case_when(
+        site %in% c(1) ~ "strandveld",
+        site %in% c(2, 6, 16) ~ "restioid",
+        site %in% c(3, 4, 5) ~ "proteoid",
+        site %in% c(7, 8, 9, 10, 12, 13, 14, 15) ~ "ericaceous",
+        site %in% c(11) ~ "alpine",
+        site %in% c(17) ~ "succulent_karoo"
+      ))
+    ) %>%
+    mutate(richness = specnumber(across(where(is.numeric)))) %>%
+    mutate(period = "modern") %>%
+    select(veg_type, period, richness)
+  dens_boxp <- rbind(xx, yy)
+  rm(xx, yy)
+}
+
+(p_dens <- dens_boxp %>%
+  mutate(
+    period = factor(period, levels = c("old", "modern")),
+    veg_type = factor(
+      veg_type,
+      levels = c(
+        "strandveld",
+        "restioid",
+        "proteoid",
+        "ericaceous",
+        "alpine",
+        "succulent_karoo"
+      )
+    )
+  ) %>%
+  ggplot(aes(x = veg_type, y = richness, fill = period)) +
+  geom_boxplot(position = "dodge") +
+  theme_minimal(base_size = 15) +
+  labs(x = "Vegetation type", y = "Species Density") +
+  scale_y_continuous(limits = c(0, max(dens_boxp$richness))) +
+  theme(
+    legend.text = element_text(size = 25),
+    legend.title = element_text(size = 25),
+    axis.text = element_text(size = 18),
+    axis.title = element_text(size = 25)
+  ) +
+  scale_x_discrete(
+    labels = c(
+      "Strandveld",
+      "Restioid Fynbos",
+      "Proteoid Fynbos",
+      "Ericaceous Fynbos",
+      "Alpine Fynbos",
+      "Succulent Karoo"
+    )
+  ) +
+  scale_fill_discrete(
+    name = "Sample",
+    labels = c("old" = "2002/2003", "modern" = "2022/2023")
+  ) +
+  theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8)))

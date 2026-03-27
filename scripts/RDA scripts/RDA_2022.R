@@ -83,6 +83,8 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
   RsquareAdj(spe.rda.signif)
 }
 
+coef(spe.rda.signif)
+
 # spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
 
 RsquareAdj(model_full)
@@ -96,7 +98,12 @@ anova.cca(spe.rda.signif, step = 1000)
 anova.cca(spe.rda.signif, step = 1000, by = "term")
 anova.cca(spe.rda.signif, step = 1000, by = "axis")
 
-ef <- envfit(spe.rda.signif, Zenv_data, choices = c(1, 2))
+anova.cca(model_full, step = 1000)
+anova.cca(model_full, step = 1000, by = "term")
+anova.cca(model_full, step = 1000, by = "axis")
+
+
+ef <- envfit(model_full, Zenv_data, choices = c(1, 2))
 ef
 
 {

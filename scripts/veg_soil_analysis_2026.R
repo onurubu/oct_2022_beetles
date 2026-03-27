@@ -656,7 +656,20 @@ summary(model_maxhgt_period_sites)
 
     site_data <- data.table::fread("./site_data/site_attributes.csv") %>%
       select(site, replicate, elevation, slope) %>%
-      mutate(site = as.factor(site), replicate = as.factor(replicate))
+      # select(site, replicate, elevation, slope, longitude, latitude) %>%
+      # rename(x = longitude, y = latitude) %>%
+      mutate(
+        site = as.factor(site),
+        replicate = as.factor(replicate)
+      ) #,
+    #   x2 = (x)^2,
+    #   xy = (x * y),
+    #   y2 = (y)^2,
+    #   x3 = (x)^3,
+    #   x2y = ((x)^2 * y),
+    #   xy2 = (x * (y)^2),
+    #   y3 = (y)^3
+    # )
 
     fire_data <- readRDS("./fire_data/fire_history.rds") %>%
       select(-fire_years)
