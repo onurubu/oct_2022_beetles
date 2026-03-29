@@ -310,10 +310,13 @@ plot_group <- function(data_all, group_elevs, title_text) {
 # 9. FINAL: THREE PLOTS (YEARS POOLED)
 
 # West – low elevations
-plot_group(beetles, group1, "0–900 m a.s.l. W (2002-2005 and 2022-2023)")
+plot_group(beetles, group1, "0–900 m a.s.l. W")
 
 # West – high elevations
-plot_group(beetles, group2, "1100–1900 m a.s.l. W (2002-2005 and 2022-2023)")
+plot_group(beetles, group2, "1100–1900 m a.s.l. W")
 
 # East – elevations
-plot_group(beetles, group3, "1700–500 m a.s.l. E (2002-2005 and 2022-2023)")
+plot_group(beetles, group3, "1700–500 m a.s.l. E")
+
+
+par(mfrow = c(1, 1))

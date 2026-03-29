@@ -3457,3 +3457,25 @@ hist_abund_table_all <- abund_all %>%
     labels = c("old" = "2002/2003", "modern" = "2022/2023")
   ) +
   theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8)))
+
+# greek diversity ####
+library(zetadiv)
+
+View(bird.spec.fine)
+xy <- bird.spec.fine[, 1:2] # geographic coordinates of sites
+data.spec <- bird.spec.fine[, 3:192] # site-by-species matrix
+View(bird.env.fine)
+data.env <- bird.env.fine[, 3:9] # site-by-environment matrix
+
+set.seed(1)
+dev.new(width = 12, height = 4)
+zeta.decline.fine.ex <- Zeta.decline.ex(data.spec, orders = 1:50)
+dev.new(width = 12, height = 4)
+zeta.decline.fine.NON <- Zeta.decline.mc(
+  data.spec,
+  xy,
+  orders = 1:50,
+  NON = TRUE,
+  DIR = FALSE,
+  FPO = NULL
+)
