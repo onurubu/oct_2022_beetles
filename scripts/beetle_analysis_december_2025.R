@@ -3014,6 +3014,10 @@ model_all <- abund_all %>%
   )
 summary(model_all)
 
+#### TESTING
+
+#### TESTING
+
 model_anthia <- abund_all %>%
   MCMCglmm(
     data = .,
