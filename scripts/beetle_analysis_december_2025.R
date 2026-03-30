@@ -3219,32 +3219,40 @@ beet_wide_results %>%
 hist_abund_table_anthia <- abund_all %>%
   group_by(year, site) %>%
   summarise(
-    `sd` = sd(anthia_decemguttata),
+    s_d = plotrix::std.error(abund),
     anthia_decemguttata = sum(anthia_decemguttata),
     .groups = "drop"
   ) %>%
-  pivot_wider(names_from = c(year), values_from = c(anthia_decemguttata, `sd`))
+  pivot_wider(names_from = c(year), values_from = c(anthia_decemguttata, s_d))
 
 hist_abund_table_stenocara <- abund_all %>%
   group_by(year, site) %>%
   summarise(
-    `sd` = sd(stenocara_dentata),
+    s_d = plotrix::std.error(abund),
     stenocara_dentata = sum(stenocara_dentata),
     .groups = "drop"
   ) %>%
-  pivot_wider(names_from = c(year), values_from = c(stenocara_dentata, `sd`))
+  pivot_wider(names_from = c(year), values_from = c(stenocara_dentata, s_d))
 
 hist_abund_table_zophosis <- abund_all %>%
   group_by(year, site) %>%
   summarise(
-    `sd` = sd(zophosis_gracilicornis),
+    s_d = plotrix::std.error(zophosis_gracilicornis),
     zophosis_gracilicornis = sum(zophosis_gracilicornis),
     .groups = "drop"
   ) %>%
+  mutate(
+    elevation = as.factor(alt_labels[site]),
+    abundance_sd = paste(zophosis_gracilicornis, "±", signif(s_d, digits = 3))
+  ) %>%
+  select(year, elevation, abundance_sd) %>%
   pivot_wider(
+    id_cols = c(elevation),
     names_from = c(year),
-    values_from = c(zophosis_gracilicornis, `sd`)
-  )
+    values_from = c(abundance_sd),
+    values_fn = list
+  ) %>%
+  unnest(cols = c(`2002`, `2003`, `2022`, `2023`))
 
 hist_abund_table_all <- abund_all %>%
   group_by(year, site) %>%
