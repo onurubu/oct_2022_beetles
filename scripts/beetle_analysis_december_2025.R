@@ -17,6 +17,8 @@ rm(list = ls())
   library(vegan)
   library(MCMCglmm)
   library(data.table)
+  library(lme4)
+  library(nlme)
 }
 
 # reading in raw data with correct data types
@@ -3002,8 +3004,8 @@ abund_all <- abund_all %>%
     abundance = as.integer(rowSums(across(
       .cols = c(anthia_decemguttata, stenocara_dentata, zophosis_gracilicornis)
     )))
-  )
-abund_all$period <- relevel(abund_all$period, ref = 2)
+  ) %>%
+  mutate(period = factor(period, levels = c("old", "modern")))
 
 model_all <- abund_all %>%
   MCMCglmm(
@@ -3014,10 +3016,6 @@ model_all <- abund_all %>%
   )
 summary(model_all)
 
-#### TESTING
-
-#### TESTING
-
 model_anthia <- abund_all %>%
   MCMCglmm(
     data = .,
@@ -3027,6 +3025,13 @@ model_anthia <- abund_all %>%
   )
 summary(model_anthia)
 
+m0 <- glm(
+  data = abund_all,
+  formula = anthia_decemguttata ~ year,
+  family = "poisson"
+)
+summary(m0)
+
 model_stenocara <- abund_all %>%
   MCMCglmm(
     data = .,
@@ -3035,6 +3040,71 @@ model_stenocara <- abund_all %>%
     family = "poisson"
   )
 summary(model_stenocara)
+
+gpa_mixed <- lme(
+  anthia_decemguttata ~ year,
+  random = ~ 1 | site,
+  data = abund_all
+)
+summary(gpa_mixed)
+
+
+m1 <- glmer(
+  abundance ~ year + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  anthia_decemguttata ~ year + (1 | site:replicate),
+  data = abund_all,
+  family = poisson,
+)
+summary(m1)
+
+m1 <- glmer(
+  stenocara_dentata ~ year + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  zophosis_gracilicornis ~ year + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
+
+
+m1 <- glmer(
+  abundance ~ period + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  anthia_decemguttata ~ period + (1 | site:replicate),
+  data = abund_all,
+  family = poisson,
+)
+summary(m1)
+
+m1 <- glmer(
+  stenocara_dentata ~ period + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  zophosis_gracilicornis ~ period + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
 
 model_zophosis <- abund_all %>%
   MCMCglmm(
@@ -3483,3 +3553,111 @@ zeta.decline.fine.NON <- Zeta.decline.mc(
   DIR = FALSE,
   FPO = NULL
 )
+
+
+xx <- data.table::fread("./enso/RONI.ascii.txt") %>%
+  filter(YR > 1998) %>%
+  mutate(dd = YR + vecc)
+
+p0 <- xx %>%
+  ggplot(aes(x = dd, y = ANOM))
+p0 +
+  geom_area(data = subset(xx, ANOM <= 0), fill = "pink") +
+  geom_area(data = subset(xx, ANOM >= 0), fill = "lightblue") +
+  geom_line()
+
+library(data.table)
+setorder(xx, dd)
+
+# add a grouping variable
+# only to keep track of original and interpolated points in this example
+xx[, g := "orig"]
+
+xx <- xx %>% select(ANOM, dd)
+
+
+# interpolation
+d2 = xx[, {
+  ix = .I[c(FALSE, abs(diff(sign(xx$ANOM))) == 2)]
+  if (length(ix)) {
+    pred_dd = sapply(ix, function(i) {
+      approx(ANOM[c(i - 1, i)], dd[c(i - 1, i)], xout = 0)$ANOM
+    })
+    rbindlist(
+      .(.SD, data.table(dd = pred_dd, ANOM = 0)),
+    )
+  } else {
+    .SD
+  }
+}]
+
+ggplot(data = d2, aes(x = dd, y = ANOM))
+
+
+# Source - https://stackoverflow.com/a/27137211
+# Posted by Henrik, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-03-30, License - CC BY-SA 4.0
+
+# original data
+d <- data.frame(x = 1:6, y = c(-1, 2, 1, 2, -1, 1))
+
+d <- xx %>% select(dd, ANOM) %>% rename(x = dd, y = ANOM)
+
+# coerce to data.table
+library(data.table)
+setDT(d)
+
+# make sure data is ordered by x
+setorder(d, x)
+
+# add a grouping variable
+# only to keep track of original and interpolated points in this example
+d[, g := "orig"]
+
+# interpolation
+d2 = d[, {
+  ix = .I[c(FALSE, abs(diff(sign(d$y))) == 2)]
+  if (length(ix)) {
+    pred_x = sapply(ix, function(i) {
+      approx(x = y[c(i - 1, i)], y = x[c(i - 1, i)], xout = 0)$y
+    })
+    rbindlist(.(.SD, data.table(x = pred_x, y = 0, g = "new")))
+  } else {
+    .SD
+  }
+}]
+
+d2
+#           x  y  grp
+# 1  1.000000 -1 orig
+# 2  2.000000  2 orig
+# 3  3.000000  1 orig
+# 4  4.000000  2 orig
+# 5  5.000000 -1 orig
+# 6  6.000000  1 orig
+# 13 1.333333  0  new
+# 11 4.666667  0  new
+# 12 5.500000  0  new
+# Source - https://stackoverflow.com/a/27137211
+# Posted by Henrik, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-03-30, License - CC BY-SA 4.0
+
+ggplot(data = d2, aes(x = x, y = y)) +
+  geom_area(data = d2[y <= 0], fill = "blue") +
+  geom_area(data = d2[y >= 0], fill = "red") +
+  # geom_point(aes(color = g), size = 4) +
+  scale_color_manual(values = c("red", "black")) +
+  theme_bw() +
+  scale_y_continuous(name = "3-Month Relative Oceanic Niño Index") +
+  scale_x_continuous(
+    name = "Year",
+    breaks = as.numeric(seq(from = 2000, to = 2025, by = 1))
+  ) +
+  theme(
+    legend.text = element_text(size = 25),
+    legend.title = element_text(size = 25),
+    axis.text = element_text(size = 20),
+    axis.title = element_text(size = 25)
+  ) +
+  geom_line(y = 1, colour = "red") +
+  geom_line(y = -1, colour = "blue")

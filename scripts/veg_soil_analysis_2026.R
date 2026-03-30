@@ -187,6 +187,8 @@ model_veg_period <- data.frame(veg_cover_comp_long) %>%
     random = ~site,
   )
 summary(model_veg_period)
+library(easystats)
+model_dashboard(model_veg_period)
 
 model_veg_period_type <- veg_cover_comp_long %>%
   MCMCglmm(

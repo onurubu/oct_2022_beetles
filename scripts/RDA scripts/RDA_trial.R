@@ -77,6 +77,8 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
       Ca +
       `Ca (%)` +
       mMax_tair +
+      range_tair +
+      winddir +
       `pH (Kcl)` +
       relhum +
       swdown +
@@ -211,27 +213,251 @@ hist_full <- full_join(abund_all, env_all) %>%
       stenocara_dentata,
       zophosis_gracilicornis
     )))
+  ) %>%
+  mutate(period = factor(period, levels = c("old", "modern")))
+
+xxx <- hist_full %>%
+  group_by(year) %>%
+  summarise(across(where(is.numeric), mean))
+
+yyy <- hist_full %>%
+  group_by(period) %>%
+  summarise(across(where(is.numeric), mean))
+
+m1 <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = abundance ~ year,
+    random = ~site,
+    family = "poisson"
   )
+summary(m1)
+
+m1 <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = anthia_decemguttata ~ year,
+    random = ~site,
+    family = "poisson"
+  )
+summary(m1)
+
+m1 <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = stenocara_dentata ~ year,
+    random = ~site,
+    family = "poisson"
+  )
+summary(m1)
+
+m1 <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = zophosis_gracilicornis ~ period,
+    random = ~site,
+    family = "poisson"
+  )
+summary(m1)
 
 glm_env_period <- hist_full %>%
   MCMCglmm(
     data = .,
-    fixed = abundance ~ (site +
-      AMin_tground +
-      d_fire +
-      `C (%)` +
-      `H+ (cmol/Kg)` +
-      mMax_tair +
-      `NO3 (mg/kg)` +
-      Mg +
-      pres +
-      rock_soil) *
-      period,
+    fixed = abundance ~
+      period *
+      (`Mg (%)` +
+        Ca +
+        `Ca (%)` +
+        mMax_tair +
+        `pH (Kcl)` +
+        relhum +
+        swdown +
+        mMax_tground +
+        rock_soil +
+        veg +
+        mMax_precip),
+    ,
     random = ~site,
     family = "poisson"
   )
 summary(glm_env_period)
 
+glm_env_period <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = anthia_decemguttata ~
+      period +
+      (`Mg (%)` +
+        Ca +
+        `Ca (%)` +
+        mMax_tair +
+        winddir +
+        range_tair +
+        `pH (Kcl)` +
+        relhum +
+        swdown +
+        mMax_tground +
+        rock_soil +
+        veg +
+        mMax_precip),
+    ,
+    random = ~site,
+    family = "poisson"
+  )
+summary(glm_env_period)
+
+glm_env_period <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = stenocara_dentata ~
+      period +
+      (`Mg (%)` +
+        Ca +
+        `Ca (%)` +
+        winddir +
+        range_tair +
+        mMax_tair +
+        `pH (Kcl)` +
+        relhum +
+        swdown +
+        mMax_tground +
+        rock_soil +
+        veg +
+        mMax_precip),
+    ,
+    random = ~site,
+    family = "poisson"
+  )
+summary(glm_env_period)
+
+glm_env_period <- hist_full %>%
+  MCMCglmm(
+    data = .,
+    fixed = zophosis_gracilicornis ~
+      period *
+      (`Mg (%)` +
+        Ca +
+        `Ca (%)` +
+        mMax_tair +
+        winddir +
+        range_tair +
+        `pH (Kcl)` +
+        relhum +
+        swdown +
+        mMax_tground +
+        rock_soil +
+        veg +
+        mMax_precip),
+    ,
+    random = ~site,
+    family = "poisson"
+  )
+summary(glm_env_period)
+
+m1 <- glmer(
+  abundance ~ period *
+    (`Mg (%)` +
+      Ca +
+      `Ca (%)` +
+      mMax_tair +
+      winddir +
+      range_tair +
+      `pH (Kcl)` +
+      relhum +
+      swdown +
+      mMax_tground +
+      rock_soil +
+      veg +
+      mMax_precip) +
+    (1 | site:replicate),
+  data = hist_full,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  anthia_decemguttata ~ period *
+    (`Mg (%)` +
+      Ca +
+      `Ca (%)` +
+      mMax_tair +
+      winddir +
+      range_tair +
+      `pH (Kcl)` +
+      relhum +
+      swdown +
+      # mMax_tground +
+      rock_soil +
+      veg +
+      mMax_precip) +
+    (1 | site:replicate),
+  data = hist_full,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  stenocara_dentata ~ period *
+    (`Mg (%)` +
+      Ca +
+      `Ca (%)` +
+      mMax_tair +
+      winddir +
+      range_tair +
+      `pH (Kcl)` +
+      relhum +
+      swdown +
+      # mMax_tground +
+      rock_soil +
+      veg +
+      mMax_precip) +
+    (1 | site:replicate),
+  data = hist_full,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  zophosis_gracilicornis ~ period *
+    (`Mg (%)` +
+      Ca +
+      `Ca (%)` +
+      mMax_tair +
+      winddir +
+      range_tair +
+      `pH (Kcl)` +
+      relhum +
+      swdown +
+      mMax_tground +
+      rock_soil +
+      veg +
+      mMax_precip) +
+    (1 | site:replicate),
+  data = hist_full,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  anthia_decemguttata ~ period + (1 | site:replicate),
+  data = abund_all,
+  family = poisson,
+)
+summary(m1)
+
+m1 <- glmer(
+  stenocara_dentata ~ period + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
+
+m1 <- glmer(
+  zophosis_gracilicornis ~ period + (1 | site:replicate),
+  data = abund_all,
+  family = poisson
+)
+summary(m1)
 
 ##############################################
 # Indicator Species Analysis by Vegetation Type

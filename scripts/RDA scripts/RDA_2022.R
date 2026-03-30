@@ -200,6 +200,43 @@ ef
 
 # glm trials ####
 
+hist_full <- full_join(abund_seasonal, env_season) %>%
+  filter(year == 2022) %>%
+  mutate(slope = Zenv_data$slope)
+
+v1 <- as.vector(
+  abund_seasonal %>%
+    filter(year == 2022) %>%
+    mutate(abundance = rowSums(across(where(is.numeric)))) %>%
+    select(abundance)
+)
+v1 <- as.vector(v1$abundance)
+
+hist_full <- cbind(hist_full, v1) %>% rename(abundance = v1)
+
+m1 <- glmer(
+  abundance ~
+    (m_tair +
+      `pH (Kcl)` +
+      `Na (%)` +
+      `Mg (%)` +
+      `Ca (%)` +
+      veg +
+      range_tground +
+      rock_soil +
+      veg +
+      litter +
+      m_tground +
+      d_fire +
+      mMax_precip) +
+    (1 | site:replicate),
+  data = hist_full,
+  family = poisson
+)
+summary(m1)
+
+Sys.sleep(0.1)
+
 # hist_full <- full_join(abund_all, env_all) %>%
 #   mutate(slope = Zenv_data$slope) %>%
 #   mutate(
