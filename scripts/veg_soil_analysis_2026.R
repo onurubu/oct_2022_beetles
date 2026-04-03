@@ -132,24 +132,24 @@ veg_cover_comp_long <- veg_cover_comp %>%
         labels = c("Bare Ground", "Litter", "Exposed Rock", "Live Vegetation")
       ) +
       scale_x_discrete(labels = c("2002/2003", "2022/2023"))
-    ggsave(
-      paste0("./veg_plots/cover/period/", k, "_veg_cover_period.png"),
-      plot = p,
-      width = 3840,
-      height = 2160,
-      units = "px",
-      bg = "white",
-      create.dir = TRUE
-    )
+    # ggsave(
+    #   paste0("./veg_plots/cover/period/", k, "_veg_cover_period.png"),
+    #   plot = p,
+    #   width = 3840,
+    #   height = 2160,
+    #   units = "px",
+    #   bg = "white",
+    #   create.dir = TRUE
+    # )
   }
 
-  p <- veg_cover_comp_long %>%
+  (p <- veg_cover_comp_long %>%
     ggplot(aes(x = period, y = (value / 136), fill = name)) +
     geom_bar(position = "stack", stat = "identity") +
     theme_minimal(base_size = 15) +
     theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
+      panel.grid.major = element_line(color = "gray60", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray80", linewidth = 0.4)
     ) +
     labs(x = "Sampling Period", y = "Ground Composition (%)") +
     theme(plot.title = element_text(hjust = 0.5)) +
@@ -159,16 +159,16 @@ veg_cover_comp_long <- veg_cover_comp %>%
       name = "Ground cover",
       labels = c("Bare Ground", "Litter", "Exposed Rock", "Live Vegetation")
     ) +
-    scale_x_discrete(labels = c("2002/2003", "2022/2023"))
-  ggsave(
-    paste0("./veg_plots/cover/period/all_veg_cover_years.png"),
-    plot = p,
-    width = 3840,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
+    scale_x_discrete(labels = c("2002/2003", "2022/2023")))
+  # ggsave(
+  #   paste0("./veg_plots/cover/period/all_veg_cover_years.png"),
+  #   plot = p,
+  #   width = 3840,
+  #   height = 2160,
+  #   units = "px",
+  #   bg = "white",
+  #   create.dir = TRUE
+  # )
   rm(k, p)
 }
 
@@ -186,9 +186,16 @@ model_veg_period <- data.frame(veg_cover_comp_long) %>%
     fixed = value ~ (period * name),
     random = ~site,
   )
+
+model_veg_period <- data.frame(veg_cover_comp_long) %>%
+  glmer(
+    value ~ period * name + (1 | site:replicate),
+    data = hist_full,
+    family = poisson
+  )
+summary(m1)
+
 summary(model_veg_period)
-library(easystats)
-model_dashboard(model_veg_period)
 
 model_veg_period_type <- veg_cover_comp_long %>%
   MCMCglmm(
