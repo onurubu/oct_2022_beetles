@@ -188,13 +188,10 @@ model_veg_period <- data.frame(veg_cover_comp_long) %>%
   )
 
 model_veg_period <- data.frame(veg_cover_comp_long) %>%
-  glmer(
+  lmer(
     value ~ period * name + (1 | site:replicate),
-    data = hist_full,
-    family = poisson
+    data = .,
   )
-summary(m1)
-
 summary(model_veg_period)
 
 model_veg_period_type <- veg_cover_comp_long %>%
