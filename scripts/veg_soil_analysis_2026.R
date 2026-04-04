@@ -148,18 +148,25 @@ veg_cover_comp_long <- veg_cover_comp %>%
     geom_bar(position = "stack", stat = "identity") +
     theme_minimal(base_size = 15) +
     theme(
-      panel.grid.major = element_line(color = "gray60", linewidth = 0.8),
-      panel.grid.minor = element_line(color = "gray80", linewidth = 0.4)
+      panel.grid.major = element_line(color = "black", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray10", linewidth = 0.4),
+      panel.grid.major.x = element_blank()
     ) +
     labs(x = "Sampling Period", y = "Ground Composition (%)") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    ggtitle("All Sites") +
+    # ggtitle("All Sites") +
     scale_fill_manual(
       values = c("#674533", "#B47A3B", "#9B9F9E", "#409B44"),
       name = "Ground cover",
       labels = c("Bare Ground", "Litter", "Exposed Rock", "Live Vegetation")
     ) +
-    scale_x_discrete(labels = c("2002/2003", "2022/2023")))
+    scale_x_discrete(labels = c("2002/2003", "2022/2023"))) +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 25),
+      axis.title = element_text(size = 25)
+    )
   # ggsave(
   #   paste0("./veg_plots/cover/period/all_veg_cover_years.png"),
   #   plot = p,
@@ -185,12 +192,6 @@ model_veg_period <- data.frame(veg_cover_comp_long) %>%
     data = .,
     fixed = value ~ (period * name),
     random = ~site,
-  )
-
-model_veg_period <- data.frame(veg_cover_comp_long) %>%
-  lmer(
-    value ~ period * name + (1 | site:replicate),
-    data = .,
   )
 summary(model_veg_period)
 
@@ -358,27 +359,35 @@ veg_height_season <- veg_height %>%
     )
   }
 
-  p <- veg_height_comp %>%
+  (p_t <- veg_height_comp %>%
     ggplot(aes(x = period, y = tothits)) +
     geom_boxplot() +
     theme_minimal(base_size = 15) +
     theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+      panel.grid.major.x = element_blank()
     ) +
     labs(x = "Sampling Period", y = "Vertical vegetation complexity") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    ggtitle("All Sites") +
-    scale_x_discrete(labels = c("2002/2003", "2022/2023"))
-  ggsave(
-    paste0("./veg_plots/height/tothits/period/all_veg_height_period.png"),
-    plot = p,
-    width = 3840,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
+    # ggtitle("All Sites") +
+    scale_x_discrete(labels = c("2002/2003", "2022/2023")) +
+    scale_x_discrete(labels = c("2002/2003", "2022/2023")) +
+    theme(
+      legend.text = element_text(size = 20),
+      legend.title = element_text(size = 20),
+      axis.text = element_text(size = 20),
+      axis.title = element_text(size = 20)
+    ))
+  # ggsave(
+  #   paste0("./veg_plots/height/tothits/period/all_veg_height_period.png"),
+  #   plot = p,
+  #   width = 3840,
+  #   height = 2160,
+  #   units = "px",
+  #   bg = "white",
+  #   create.dir = TRUE
+  # )
   rm(k, p)
 }
 
@@ -461,29 +470,38 @@ veg_height_season <- veg_height %>%
     )
   }
 
-  p <- veg_height_comp %>%
+  (p_m <- veg_height_comp %>%
     ggplot(aes(x = period, y = ((maxhgt - 1) * 25))) +
     geom_boxplot() +
     theme_minimal(base_size = 15) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
     labs(x = "Sampling Period", y = "Maximum vegetation height (cm)") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    ggtitle("All Sites") +
-    scale_x_discrete(labels = c("2002/2003", "2022/2023"))
-  ggsave(
-    paste0("./veg_plots/height/maxhgt/period/all_veg_height_period.png"),
-    plot = p,
-    width = 3840,
-    height = 2160,
-    units = "px",
-    bg = "white",
-    create.dir = TRUE
-  )
+    # ggtitle("All Sites") +
+    scale_x_discrete(labels = c("2002/2003", "2022/2023")) +
+    theme(
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+      panel.grid.major.x = element_blank()
+    ) +
+    theme(
+      legend.text = element_text(size = 20),
+      legend.title = element_text(size = 20),
+      axis.text = element_text(size = 20),
+      axis.title = element_text(size = 20)
+    ))
+  # ggsave(
+  #   paste0("./veg_plots/height/maxhgt/period/all_veg_height_period.png"),
+  #   plot = p,
+  #   width = 3840,
+  #   height = 2160,
+  #   units = "px",
+  #   bg = "white",
+  #   create.dir = TRUE
+  # )
   rm(k, p)
 }
+
+gridExtra::grid.arrange(p_t, p_m)
 
 model_tothits_years <- veg_height_comp %>%
   MCMCglmm(
@@ -868,3 +886,11 @@ summary(model_maxhgt_period_sites)
     )
   }
 }
+
+# xx <- beet_wide %>%
+#   group_by(year) %>%
+#   summarise(across(where(is.numeric), sum)) %>%
+#   pivot_longer(cols = where(is.numeric)) %>%
+#   pivot_wider(names_from = c(year), values_from = c(value)) %>%
+#   arrange(desc(`2023`))
+# fwrite(xx, "~/Downloads/table.csv")
