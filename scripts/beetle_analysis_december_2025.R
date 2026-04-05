@@ -23,25 +23,25 @@ rm(list = ls())
 
 # reading in raw data with correct data types
 {
-  alt_labels <- c(
-    "0m(W)",
-    "200m(W)",
-    "300m(W)",
-    "500m(W)",
-    "700m(W)",
-    "900m(W)",
-    "1100m(W)",
-    "1300m(W)",
-    "1500m(W)",
-    "1700m(W)",
-    "1900m(W)",
-    "1700m(E)",
-    "1500m(E)",
-    "1300m(E)",
-    "1100m(E)",
-    "900m(E)",
-    "500m(E)"
-  )
+  # alt_labels <- c(
+  #   "0m(W)",
+  #   "200m(W)",
+  #   "300m(W)",
+  #   "500m(W)",
+  #   "700m(W)",
+  #   "900m(W)",
+  #   "1100m(W)",
+  #   "1300m(W)",
+  #   "1500m(W)",
+  #   "1700m(W)",
+  #   "1900m(W)",
+  #   "1700m(E)",
+  #   "1500m(E)",
+  #   "1300m(E)",
+  #   "1100m(E)",
+  #   "900m(E)",
+  #   "500m(E)"
+  # )
 
   # alt_labels <- c(
   #   "0m (W)",
@@ -63,25 +63,25 @@ rm(list = ls())
   #   "500m (E)"
   # )
 
-  # alt_labels <- c(
-  #   "0 W",
-  #   "200 W",
-  #   "300 W",
-  #   "500 W",
-  #   "700 W",
-  #   "900 W",
-  #   "1100 W",
-  #   "1300 W",
-  #   "1500 W",
-  #   "1700 W",
-  #   "1900 W",
-  #   "1700 E",
-  #   "1500 E",
-  #   "1300 E",
-  #   "1100 E",
-  #   "900 E",
-  #   "500 E"
-  # )
+  alt_labels <- c(
+    "0 W",
+    "200 W",
+    "300 W",
+    "500 W",
+    "700 W",
+    "900 W",
+    "1100 W",
+    "1300 W",
+    "1500 W",
+    "1700 W",
+    "1900 W",
+    "1700 E",
+    "1500 E",
+    "1300 E",
+    "1100 E",
+    "900 E",
+    "500 E"
+  )
 
   beet_wern <- read.csv(
     "./working_beetle_data/beet_wern_ID.csv",
@@ -1347,17 +1347,76 @@ gridExtra::grid.arrange(p7, p8)
   Herb_community.mds$stress
 
   p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_point() +
-    stat_ellipse() +
+    geom_point(key_glyph = "point", cex = 2) +
+    stat_ellipse(key_glyph = "blank") +
     theme_bw() +
-    ggtitle("Species presence by year") +
-    scale_color_discrete(name = "Year")
-  p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = veg_type)) +
-    geom_point() +
-    stat_ellipse() +
+    # ggtitle("Species presence by year") +
+    scale_color_discrete(name = "Year") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 25),
+      axis.text.x = element_text(size = 25),
+      axis.title = element_text(size = 25)
+    ) +
+    labs(tag = "(b)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    guides(
+      colour = guide_legend(override.aes = list(size = 8), title = "Year")
+    )
+  p1
+  p2 <- MDS_xy %>%
+    mutate(
+      veg_type = factor(
+        veg_type,
+        levels = c(
+          "strandveld",
+          "restioid",
+          "proteoid",
+          "ericaceous",
+          "alpine",
+          "succulent_karoo"
+        )
+      )
+    ) %>%
+    ggplot(aes(MDS1, MDS2, color = veg_type)) +
+    geom_point(key_glyph = "point", cex = 2) +
+    stat_ellipse(key_glyph = "blank") +
     theme_bw() +
-    ggtitle("Species presence by vegetation type") +
-    scale_color_discrete(name = "Vegetation Type")
+    # ggtitle("Species presence by year") +
+    scale_color_discrete(name = "Year") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 25),
+      axis.text.x = element_text(size = 25),
+      axis.title = element_text(size = 25)
+    ) +
+    labs(tag = "(b)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    guides(
+      colour = guide_legend(
+        override.aes = list(size = 8),
+        title = "Vegetation Type"
+      )
+    ) +
+    scale_colour_discrete(
+      labels = c(
+        "strandveld" = "Strandveld",
+        "restioid" = "Restioid Fynbos",
+        "proteoid" = "Proteoid Fynbos",
+        "ericaceous" = "Ericaceous Fynbos",
+        "alpine" = "Alpine Fynbos",
+        "succulent_karoo" = "Succulent Karoo"
+      )
+    )
+  p2
   # p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) + theme_bw() + geom_point(alpha = 0) + ggtitle("Species presence by year with sites, overlaps jittered") + scale_color_discrete(name = "Year", guide = guide_legend(override.aes = list(alpha = 1))) + ggrepel::geom_text_repel(data = MDS_xy, mapping = aes(MDS1, MDS2, label = site), show.legend = FALSE, max.overlaps = 1000)
   p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
     theme_bw() +
@@ -1519,17 +1578,74 @@ for (k in 1:17) {
   Herb_community.mds$stress
 
   p1 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
-    geom_point() +
-    stat_ellipse() +
+    geom_point(key_glyph = "point", cex = 2) +
+    stat_ellipse(key_glyph = "blank") +
     theme_bw() +
-    ggtitle("Species abundance by year") +
-    scale_color_discrete(name = "Year")
-  p2 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = veg_type)) +
-    geom_point() +
-    stat_ellipse() +
+    # ggtitle("Species presence by year") +
+    scale_color_discrete(name = "Year") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 25),
+      axis.text.x = element_text(size = 25),
+      axis.title = element_text(size = 25)
+    ) +
+    labs(tag = "(a)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    guides(
+      colour = guide_legend(override.aes = list(size = 8), title = "Year")
+    )
+  p2 <- MDS_xy %>%
+    mutate(
+      veg_type = factor(
+        veg_type,
+        levels = c(
+          "strandveld",
+          "restioid",
+          "proteoid",
+          "ericaceous",
+          "alpine",
+          "succulent_karoo"
+        )
+      )
+    ) %>%
+    ggplot(aes(MDS1, MDS2, color = veg_type)) +
+    geom_point(key_glyph = "point", cex = 2) +
+    stat_ellipse(key_glyph = "blank") +
     theme_bw() +
-    ggtitle("Species abundance by vegetation type") +
-    scale_color_discrete(name = "Vegetation type")
+    # ggtitle("Species presence by year") +
+    scale_color_discrete(name = "Year") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 25),
+      axis.text.x = element_text(size = 25),
+      axis.title = element_text(size = 25)
+    ) +
+    labs(tag = "(a)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    guides(
+      colour = guide_legend(
+        override.aes = list(size = 8),
+        title = "Vegetation Type"
+      )
+    ) +
+    scale_colour_discrete(
+      labels = c(
+        "strandveld" = "Strandveld",
+        "restioid" = "Restioid Fynbos",
+        "proteoid" = "Proteoid Fynbos",
+        "ericaceous" = "Ericaceous Fynbos",
+        "alpine" = "Alpine Fynbos",
+        "succulent_karoo" = "Succulent Karoo"
+      )
+    )
   # p3 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) + theme_bw() + geom_point(alpha = 0) + ggtitle("Species abundance by year with sites, overlaps jittered") + scale_color_discrete(name = "Year", guide = guide_legend(override.aes = list(alpha = 1))) + ggrepel::geom_text_repel(data = MDS_xy, mapping = aes(MDS1, MDS2, label = site), show.legend = FALSE, max.overlaps = 1000)
   p4 <- ggplot(MDS_xy, aes(MDS1, MDS2, color = year)) +
     theme_bw() +
@@ -2520,67 +2636,107 @@ for (k in 1:17) {
       stenocara_dentata = stenocara_dentata / 10,
       zophosis_gracilicornis = zophosis_gracilicornis / 10
     ) %>%
-    filter(paste(year, season) != "2023 March")
+    filter(paste(year, season) != "2023 March") %>%
+    mutate(
+      abundance = anthia_decemguttata +
+        stenocara_dentata +
+        zophosis_gracilicornis
+    )
 
-  p1 <- abund_box_data %>%
-    ggplot(aes(x = year, y = anthia_decemguttata)) +
-    geom_boxplot() +
-    theme_minimal(base_size = 10) +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
-    ) +
-    labs(x = "Year", y = "Mean Abundance") +
-    ggtitle("Anthia decemguttata mean abundance per year") +
-    theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata)))
+  # p1 <- abund_box_data %>%
+  #   ggplot(aes(x = year, y = anthia_decemguttata)) +
+  #   geom_boxplot() +
+  #   theme_minimal(base_size = 10) +
+  #   theme(
+  #     panel.grid.major = element_blank(),
+  #     panel.grid.minor = element_blank()
+  #   ) +
+  #   labs(x = "Year", y = "Mean Abundance") +
+  #   ggtitle("Anthia decemguttata mean abundance per year") +
+  #   theme(plot.title = element_text(hjust = 0.5)) +
+  #   scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata)))
 
   p2 <- abund_box_data %>%
     ggplot(aes(x = site, y = anthia_decemguttata, fill = year)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+      panel.grid.major.x = element_blank()
     ) +
-    labs(x = "Site", y = "Mean Abundance") +
-    ggtitle("Anthia decemguttata mean abundance per year") +
+    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    # ggtitle("Anthia decemguttata mean abundance per year") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata))) +
-    scale_fill_discrete(name = "Year")
-
-  p3 <- abund_box_data %>%
-    mutate(period = factor(period, levels = c("old", "modern"))) %>%
-    ggplot(aes(x = period, y = anthia_decemguttata)) +
-    geom_boxplot() +
-    theme_minimal(base_size = 10) +
+    scale_y_continuous(
+      limits = c(0, max(abund_box_data$anthia_decemguttata))
+    ) +
+    scale_fill_discrete(name = "Year") +
     theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 25),
+      axis.text.x = element_text(size = 20),
+      axis.title = element_text(size = 25)
     ) +
-    labs(x = "Year", y = "Mean Abundance") +
-    ggtitle("Anthia decemguttata mean abundance per sampling period") +
-    theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata)))
-
+    labs(tag = "(b)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
+  # p3 <- abund_box_data %>%
+  #   mutate(period = factor(period, levels = c("old", "modern"))) %>%
+  #   ggplot(aes(x = period, y = anthia_decemguttata)) +
+  #   geom_boxplot() +
+  #   theme_minimal(base_size = 10) +
+  #   theme(
+  #     panel.grid.major = element_blank(),
+  #     panel.grid.minor = element_blank()
+  #   ) +
+  #   labs(x = "Year", y = "Mean Abundance") +
+  #   ggtitle("Anthia decemguttata mean abundance per sampling period") +
+  #   theme(plot.title = element_text(hjust = 0.5)) +
+  #   scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata)))
   p4 <- abund_box_data %>%
     mutate(period = factor(period, levels = c("old", "modern"))) %>%
     ggplot(aes(x = site, y = anthia_decemguttata, fill = period)) +
     geom_boxplot(position = "dodge") +
     theme_minimal(base_size = 10) +
     theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank()
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+      panel.grid.major.x = element_blank()
     ) +
-    labs(x = "Site", y = "Mean Abundance") +
-    ggtitle("Anthia decemguttata mean abundance per samplling period") +
+    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    # ggtitle("Anthia decemguttata mean abundance per year") +
     theme(plot.title = element_text(hjust = 0.5)) +
-    scale_y_continuous(limits = c(0, max(abund_box_data$anthia_decemguttata))) +
+    scale_y_continuous(
+      limits = c(0, max(abund_box_data$anthia_decemguttata))
+    ) +
+    scale_fill_discrete(name = "Year") +
+    theme(
+      legend.text = element_text(size = 25),
+      legend.title = element_text(size = 25),
+      axis.text = element_text(size = 25),
+      axis.text.x = element_text(size = 20),
+      axis.title = element_text(size = 25)
+    ) +
+    labs(tag = "(a)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
     scale_fill_discrete(
       name = "Sampling period",
       labels = c("old" = "2002/2003", "modern" = "2022/2023")
-    )
+    ) +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
 }
+
+gridExtra::grid.arrange(p4, p2)
 
 {
   ggsave(

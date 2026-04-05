@@ -1139,7 +1139,7 @@ p_west <- ggplot(
     axis.text.x = element_text(size = 20),
     axis.title = element_text(size = 25)
   ) +
-  labs(tag = "(a)", size = 20) +
+  labs(tag = "(a)") +
   theme(plot.tag.position = c(0.05, 0.98), plot.tag = element_text(size = 25))
 
 p_west # print West plot
