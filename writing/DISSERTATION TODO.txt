@@ -3,6 +3,7 @@ DISSERTATION TODO:
   Finish editing initial:
     Chapter 1
     Chapter 2
+      Finish writing conclusion
     Chapter 3 X
     Appendix  X
   
