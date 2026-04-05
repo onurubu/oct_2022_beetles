@@ -1,0 +1,20 @@
+DISSERTATION TODO:
+
+  Finish editing initial:
+    Chapter 1
+    Chapter 2
+    Chapter 3 X
+    Appendix  X
+  
+  Finish editing final:
+    Chapter 1
+    Chapter 2
+    Chapter 3
+    Appendix
+  
+  Put all chapters into one document
+
+  Final document:
+    Abstract
+    Acknowledgements
+    Table of contents
