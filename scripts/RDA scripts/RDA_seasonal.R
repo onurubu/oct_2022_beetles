@@ -71,6 +71,8 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 {
   spe.rda.signif <- rda(
     formula = Zspp_data ~ AMin_tair +
+      `Na (%)` +
+      `Mg (%)` +
       `pH (Kcl)` +
       year +
       Name +
@@ -79,6 +81,7 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
       `Mg (%)` +
       mMax_tground +
       veg +
+      windspeed +
       m_precip,
     data = Zenv_data
   )
@@ -89,6 +92,7 @@ model_full <- rda(Zspp_data ~ ., data = Zenv_data)
 # spe.rda.signif <- rda(formula(fwd.sel$call), data = Zenv_data)
 
 RsquareAdj(model_full)
+RsquareAdj(fwd.sel)
 
 summary(fwd.sel)
 summary(model_full)

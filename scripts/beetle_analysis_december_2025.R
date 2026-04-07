@@ -276,11 +276,7 @@ Sys.sleep(0.1)
 
   p3 <- modern_species_div %>%
     ggplot(aes(x = site, y = richness, fill = year)) +
-    theme_minimal(base_size = 14) +
-    # theme(
-    #   panel.grid.major = element_blank(),
-    #   panel.grid.minor = element_blank()
-    # ) +
+    theme_minimal(base_size = 15) +
     labs(x = "Altitude (m) and Aspect", y = "Species richness") +
     ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
@@ -294,17 +290,25 @@ Sys.sleep(0.1)
       axis.title = element_text(size = 25)
     ) +
     scale_fill_discrete(
-      name = "Season",
+      name = "Sampling season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
-    )
+    ) +
+    theme(
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+    ) +
+    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    labs(tag = "(a)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
 
   p4 <- modern_species_div %>%
     ggplot(aes(x = site, y = abundance, fill = year)) +
     theme_minimal(base_size = 14) +
-    # theme(
-    #   panel.grid.major = element_blank(),
-    #   panel.grid.minor = element_blank()
-    # ) +
     labs(x = "Altitude (m) and Aspect", y = "Abundance") +
     ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
@@ -318,9 +322,21 @@ Sys.sleep(0.1)
       axis.title = element_text(size = 25)
     ) +
     scale_fill_discrete(
-      name = "Season",
+      name = "Sampling season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
-    )
+    ) +
+    theme(
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+    ) +
+    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    labs(tag = "(b)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
 
   # veg types combined year ##
 
@@ -364,10 +380,9 @@ Sys.sleep(0.1)
     #   panel.grid.minor = element_blank()
     # ) +
     labs(x = "Vegetation Type", y = "Species richness") +
-    ggtitle(
-      ""
-    ) +
+    ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
+    scale_x_discrete(labels = alt_labels) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
     stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
     theme(
@@ -377,9 +392,21 @@ Sys.sleep(0.1)
       axis.title = element_text(size = 25)
     ) +
     scale_fill_discrete(
-      name = "Season",
+      name = "Sampling season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
-    )
+    ) +
+    theme(
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+    ) +
+    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    labs(tag = "(a)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
 
   p8 <- modern_species_div %>%
     ggplot(aes(x = veg_type, y = abundance, fill = year)) +
@@ -389,10 +416,9 @@ Sys.sleep(0.1)
     #   panel.grid.minor = element_blank()
     # ) +
     labs(x = "Vegetation Type", y = "Abundance") +
-    ggtitle(
-      ""
-    ) +
+    ggtitle("") +
     theme(plot.title = element_text(hjust = 0.5)) +
+    scale_x_discrete(labels = alt_labels) +
     stat_summary(geom = "col", position = "dodge", fun.data = "mean_se") +
     stat_summary(geom = "errorbar", fun.data = "mean_se", position = "dodge") +
     theme(
@@ -402,9 +428,21 @@ Sys.sleep(0.1)
       axis.title = element_text(size = 25)
     ) +
     scale_fill_discrete(
-      name = "Season",
+      name = "Sampling season",
       labels = c("2022" = "October 2022", "2023" = "March 2023")
-    )
+    ) +
+    theme(
+      panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
+      panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
+    ) +
+    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    labs(tag = "(b)") +
+    theme(
+      plot.tag.position = c(0.05, 0.98),
+      plot.tag = element_text(size = 25)
+    ) +
+    scale_x_discrete(labels = alt_labels) +
+    theme(legend.position = "inside", legend.position.inside = c(0.9, 0.8))
 }
 
 gridExtra::grid.arrange(p3, p4)
