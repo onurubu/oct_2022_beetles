@@ -297,7 +297,7 @@ Sys.sleep(0.1)
       panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
       panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
     ) +
-    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    labs(x = "Elevation and aspect", y = "Species richness") +
     labs(tag = "(a)") +
     theme(
       plot.tag.position = c(0.05, 0.98),
@@ -399,7 +399,7 @@ Sys.sleep(0.1)
       panel.grid.major = element_line(color = "gray80", linewidth = 0.8),
       panel.grid.minor = element_line(color = "gray60", linewidth = 0.4),
     ) +
-    labs(x = "Elevation and aspect", y = "Mean Abundance") +
+    labs(x = "Elevation and aspect", y = "Species richness") +
     labs(tag = "(a)") +
     theme(
       plot.tag.position = c(0.05, 0.98),
